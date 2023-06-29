@@ -23,13 +23,14 @@ public class Main {
     b1.9pre4 - fortune + silk
     b1.9pre5 - wooden tool enchantability increased
     1.1 - bows can be enchanted, level formula change
+    12w18a - internal server
     12w22a (1.3) - 50 -> 30 level change
     13w50a (1.4.6) - chestplates can receive thorns
     13w36a (1.7) - fishing rods can be enchanted, armor + bows can receive unbreaking
     14w02a (1.8) - end of this tool
      */
 
-    private static final String[] versionStrings = new String[]{"b1.9pre4", "b1.9pre5 - 1.0", "1.1 - 12w21b (1.3)"};
+    private static final String[] versionStrings = new String[]{"b1.9pre4", "b1.9pre5 - 1.0", "1.1 - 12w17a (1.3)"};
     private static Version version = new Zero();
     private static final HashMap<EnchantmentList.Enchant, JComponent[]> manipulatorEnchantmentSelectorComponents = new HashMap<>();
     private static String item = "";
