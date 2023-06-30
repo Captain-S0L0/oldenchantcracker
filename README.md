@@ -6,7 +6,7 @@ Plug that data into the wonderful [LattiCG](https://github.com/mjtb49/LattiCG), 
 **This only works in singleplayer**, as the enchanting container used by the client and the "server" are the same object, thus the Random is the same. This breaks with the move to the internal server,
 as the container object that seeded the enchanting GUI was no longer shared.<br><br>
 A short video explaining how to use this tool can be found [here](https://youtu.be/elcx1i7Zauc).<br><br>
-A new function has been added that allows for obtaining your enchantments in less advances that is NOT convered
+A new function has been added that allows for obtaining your enchantments in less advances that is NOT covered
 in that tutorial. To enable, tick the "Advanced Advances" box on the manipulation tab. From there, you need to know
 what to do with the results, and they are as follows:
 * "Swap Different" - Swap the item with something else that is enchantable.
