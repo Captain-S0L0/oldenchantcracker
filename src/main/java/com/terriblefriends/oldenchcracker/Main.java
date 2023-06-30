@@ -9,6 +9,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -37,12 +42,14 @@ public class Main {
     private static String material = "";
     private static int bookshelves = version.getMaxBookShelves();
     private static final JTabbedPane tabs = new JTabbedPane();
+    private static final JPanel helpPanel = new JPanel();
     private static final JPanel setupPanel = new JPanel();
     private static final JPanel crackerPanel = new JPanel();
     private static final JPanel manipulatorPanel = new JPanel();
     private static long rngSeed = -1;
     private static long postRngSeed = -1;
     private static int maxAdvances = 10000;
+    private static boolean advancedAdvances = false;
     private static Future threadTask = null;
 
     public static void main(String[] args) {
@@ -57,7 +64,9 @@ public class Main {
         frame.setSize(625,600);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        createSetupMenu();
+        createHelpPanel();
+        createSetupPanel();
+        tabs.addTab("Help", helpPanel);
         tabs.addTab("Setup", setupPanel);
 
         frame.add(tabs);
@@ -65,7 +74,130 @@ public class Main {
         frame.setVisible(true);
     }
 
-    private static void createSetupMenu() {
+    private static void createHelpPanel() {
+        helpPanel.setLayout(null);
+        helpPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+        JLabel helpLabel;
+        helpLabel = new JLabel("Welcome to Enchantment Cracking before Minecraft 1.3, by Captain_S0L0!");
+        setPosition(helpLabel, 10, 10);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("You can find a tutorial on its usage here.");
+        setPosition(helpLabel, 10, 30);
+        helpLabel.setForeground(Color.BLUE.darker());
+        helpLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        helpLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    Desktop.getDesktop().browse(new URI("https://youtu.be/elcx1i7Zauc"));
+
+                } catch (IOException | URISyntaxException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("If you're too boring to watch a 5 minute video, then here's a rundown:");
+        setPosition(helpLabel, 10, 50);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("1) Select your version and the amount of bookshelves you have in the \"Setup tab\", and click \"Start!\".");
+        setPosition(helpLabel, 10, 70);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("2) Make sure you have all items you want to enchant in your inventory, and enough XP.");
+        setPosition(helpLabel, 10, 90);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("     The GUI must stay open throughout this entire process.");
+        setPosition(helpLabel, 10, 110);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("4) Open the GUI and place an item to be enchanted into the item slot.");
+        setPosition(helpLabel, 10, 130);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("5) See which slots display 4 words, and check the \"4 Words ?\" checkmark accordingly.");
+        setPosition(helpLabel, 10, 150);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("     Then, look at the first letters of each word in Standard Galactic.");
+        setPosition(helpLabel, 10, 170);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("     Enter what number each word corresponds to in the chart to the right.");
+        setPosition(helpLabel, 10, 190);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("6) Enter the level cost each slot displays in the \"Level:\" column.");
+        setPosition(helpLabel, 10, 210);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("7) When all data is entered, the \"Crack RNG\" button will become available. Click it.");
+        setPosition(helpLabel, 10, 230);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("     LattiCG will take a bit, but when it is done, it (hopefully) will display \"Cracked RNG!\".");
+        setPosition(helpLabel, 10, 250);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("     If it does not, then double check that everything you entered is correct.");
+        setPosition(helpLabel, 10, 270);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("8) Proceed to the \"Manipulator\" tab. Select the tool and material of what you're enchanting.");
+        setPosition(helpLabel, 10, 290);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("     Select which enchantments you want, and what level you want them at.");
+        setPosition(helpLabel, 10, 310);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("     If you want those enchants exactly, check the \"Exactly\" checkmark.");
+        setPosition(helpLabel, 10, 330);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("     Otherwise, the finder will find at least those enchantments and levels, or better.");
+        setPosition(helpLabel, 10, 350);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("9) Click the \"Find Enchants\" button. If a valid candidate is found, it will say so.");
+        setPosition(helpLabel, 10, 370);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("     If one is not found, then you can either raise the \"Max Advances\" value, or try something else.");
+        setPosition(helpLabel, 10, 390);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("10) For each advance, click the item out and back into the slot.");
+        setPosition(helpLabel, 10, 410);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("11) When you have made the correct amount of advancements, check that the levels displayed match");
+        setPosition(helpLabel, 10, 430);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("     what is inside the brackets. (e.g. \"[14,24,47]\") If they match, select the slot displayed.");
+        setPosition(helpLabel, 10, 450);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("     (1 is the top, 2 is the middle, 3 is the bottom.))");
+        setPosition(helpLabel, 10, 470);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("12) You should now have your desired enchants. Click the \"Enchantment Done!\" button.");
+        setPosition(helpLabel, 10, 490);
+        helpPanel.add(helpLabel);
+
+        helpLabel = new JLabel("13) If enchanting more, insert the next item, and repeat from Step 8.");
+        setPosition(helpLabel, 10, 510);
+        helpPanel.add(helpLabel);
+    }
+
+    private static void createSetupPanel() {
         setupPanel.setLayout(null);
         setupPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -76,10 +208,6 @@ public class Main {
 
         setupLabel = new JLabel("Shelves:");
         setPosition(setupLabel, 10,40);
-        setupPanel.add(setupLabel);
-
-        setupLabel = new JLabel("Tool by @captain_s0l0, Discord");
-        setPosition(setupLabel, 10,150);
         setupPanel.add(setupLabel);
 
         JTextField setupBookSelector = new JTextField(3);
@@ -96,7 +224,21 @@ public class Main {
             Object selection = setupVersionSelector.getSelectedItem();
             for (int i = 0; i < versionStrings.length; i++) {
                 if (Objects.equals(selection, versionStrings[i])) {
-                    Main.setVersion(i);
+                    switch (i) {
+                        case 0:
+                            version = new Zero();
+                            break;
+                        case 1:
+                            version = new One();
+                            break;
+                        case 2:
+                            version = new Two();
+
+
+                    }
+                    item = version.getItems()[0];
+                    material = version.getMaterials()[0];
+                    bookshelves = version.getMaxBookShelves();
                     setupBookSelector.setText(String.valueOf(bookshelves));
                 }
             }
@@ -131,11 +273,11 @@ public class Main {
                 String text = setupBookSelector.getText();
                 if (text.length() == 0) {
                     setupFinalizeButton.setEnabled(false);
-                    Main.setBookshelves(-1);
+                    bookshelves = -1;
                 }
                 else {
                     setupFinalizeButton.setEnabled(true);
-                    Main.setBookshelves(Integer.parseInt(text));
+                    bookshelves = Integer.parseInt(text);
                 }
             }
         });
@@ -181,8 +323,8 @@ public class Main {
         crackerLabel = new JLabel("Level:");
         setPosition(crackerLabel, 325,5);
         crackerPanel.add(crackerLabel);
-        crackerLabel = new JLabel("(THX @crafterdark, Discord)");
-        setPosition(crackerLabel, 420, 490);
+        crackerLabel = new JLabel("(THX Crafterdark)");
+        setPosition(crackerLabel, 440, 490);
         crackerPanel.add(crackerLabel);
 
         JLabel crackerResultMessage = new JLabel("(you can manually set a seed here if you're cool)");
@@ -392,7 +534,7 @@ public class Main {
             Object selection = manipulatorItemSelector.getSelectedItem();
             for (int i = 0; i < version.getItems().length; i++) {
                 if (Objects.equals(selection, version.getItems()[i])) {
-                    Main.setItem(version.getItems()[i]);
+                    item = version.getItems()[i];
                     generateManipulatorEnchantmentSelector();
                     break;
                 }
@@ -410,7 +552,7 @@ public class Main {
             Object selection = manipulatorMaterialSelector.getSelectedItem();
             for (int i = 0; i < version.getMaterials().length; i++) {
                 if (Objects.equals(selection, version.getMaterials()[i])) {
-                    Main.setMaterial(version.getMaterials()[i]);
+                    material = version.getMaterials()[i];
                     generateManipulatorEnchantmentSelector();
                     break;
                 }
@@ -427,25 +569,37 @@ public class Main {
         setPosition(manipulatorExactly, 63, 67);
         manipulatorPanel.add(manipulatorExactly);
 
-        manipulatorLabel = new JLabel("Max Advances:");
+        manipulatorLabel = new JLabel("Advanced Advances:");
         setPosition(manipulatorLabel, 90,70);
+        manipulatorPanel.add(manipulatorLabel);
+
+        JCheckBox manipulatorConsiderAllCalls = new JCheckBox();
+        setPosition(manipulatorConsiderAllCalls, 210, 67);
+        manipulatorPanel.add(manipulatorConsiderAllCalls);
+
+        manipulatorConsiderAllCalls.addActionListener((event) -> {
+            advancedAdvances = manipulatorConsiderAllCalls.isSelected();
+        });
+
+        manipulatorLabel = new JLabel("Max Advances:");
+        setPosition(manipulatorLabel, 10,100);
         manipulatorPanel.add(manipulatorLabel);
 
         JTextField setupMaxAdvancesField = new JTextField(5);
         setupMaxAdvancesField.setText(String.valueOf(maxAdvances));
-        setPosition(setupMaxAdvancesField, 190, 69);
+        setPosition(setupMaxAdvancesField, 100, 99);
         manipulatorPanel.add(setupMaxAdvancesField);
 
         JLabel manipulatorResultMessage = new JLabel("Doing nothing...");
-        manipulatorResultMessage.setBounds(10, 170, 300, manipulatorResultMessage.getPreferredSize().height);
+        manipulatorResultMessage.setBounds(10, 200, 600, manipulatorResultMessage.getPreferredSize().height);
         manipulatorPanel.add(manipulatorResultMessage);
 
         JButton manipulatorFinalizeEnchantButton = new JButton("Enchantment Done!");
-        setPosition(manipulatorFinalizeEnchantButton, 50, 125);
+        setPosition(manipulatorFinalizeEnchantButton, 50, 155);
         manipulatorFinalizeEnchantButton.setEnabled(false);
         manipulatorFinalizeEnchantButton.addActionListener((event) -> {
             manipulatorResultMessage.setText("Doing nothing...");
-            System.out.println(postRngSeed);
+            System.out.println("Set RNG to post enchant seed "+postRngSeed);
             rngSeed = postRngSeed;
             postRngSeed = -1;
             manipulatorFinalizeEnchantButton.setEnabled(false);
@@ -453,7 +607,7 @@ public class Main {
         manipulatorPanel.add(manipulatorFinalizeEnchantButton);
 
         JButton manipulatorFindEnchantButton = new JButton("Find Enchants");
-        setPosition(manipulatorFindEnchantButton, 60, 100);
+        setPosition(manipulatorFindEnchantButton, 60, 130);
         manipulatorPanel.add(manipulatorFindEnchantButton);
         manipulatorFindEnchantButton.addActionListener((event) -> {
             if (rngSeed == -1) {
@@ -480,7 +634,7 @@ public class Main {
                 }
                 else {
 
-                    EnchantFinder finder = new EnchantFinder(item, material, rngSeed, version, bookshelves, desiredEnchants, manipulatorExactly.isSelected());
+                    EnchantFinder finder = new EnchantFinder(item, material, rngSeed, version, bookshelves, maxAdvances, desiredEnchants, manipulatorExactly.isSelected(), advancedAdvances);
                     threadTask = threadPool.submit(finder);
                     while (!threadTask.isDone()) {
                         try {
@@ -495,7 +649,32 @@ public class Main {
                         if (finder.getFailed()) {
                             throw new InterruptedException("Finder Failed");
                         } else {
-                            manipulatorResultMessage.setText("Found candidate! Advances: " + finder.getResultAdvances() + ", Slot: " + (finder.getResultSlot()+1) + " "+Arrays.toString(finder.getResultLevels()));
+                            if (advancedAdvances) {
+                                System.out.println(finder.getResultAdvances() + " raw advances required");
+                                int swapDifferent = (finder.getResultAdvances() / 3);
+                                int swap = 0;
+                                int shift = 0;
+                                if (finder.getResultAdvances() == 1) {
+                                    swap+=1;
+                                }
+                                else {
+                                    int mod = finder.getResultAdvances() % 3;
+                                    if (mod == 1) {
+                                        swapDifferent-=1;
+                                        shift+=2;
+                                    }
+                                    else if (mod == 2) {
+                                        shift+=1;
+                                    }
+                                }
+                                int outIn = swapDifferent % 2 == 1 ? 1 : 0;
+                                swapDifferent-=outIn;
+
+                                manipulatorResultMessage.setText("Found candidate! Swap Different: "+ swapDifferent + ", Shift Remove: " + shift + ", Swap Same: " + swap + ", OutIn: " + outIn + ", Slot: " + (finder.getResultSlot() + 1) + " " + Arrays.toString(finder.getResultLevels()));
+                            }
+                            else {
+                                manipulatorResultMessage.setText("Found candidate! Advances: " + finder.getResultAdvances() + ", Slot: " + (finder.getResultSlot() + 1) + " " + Arrays.toString(finder.getResultLevels()));
+                            }
                             postRngSeed = finder.getResultSeed();
                             manipulatorFinalizeEnchantButton.setEnabled(true);
                         }
@@ -547,11 +726,11 @@ public class Main {
                 String text = setupMaxAdvancesField.getText();
                 if (text.length() == 0) {
                     manipulatorFindEnchantButton.setEnabled(false);
-                    Main.setMaxAdvances(-1);
+                    maxAdvances = -1;
                 }
                 else {
                     manipulatorFindEnchantButton.setEnabled(true);
-                    Main.setMaxAdvances(Integer.parseInt(text));
+                    maxAdvances = Integer.parseInt(text);
                 }
             }
         });
@@ -563,39 +742,6 @@ public class Main {
         component.setBounds(x, y, component.getPreferredSize().width, component.getPreferredSize().height);
     }
 
-    private static void setVersion(int i) {
-        switch (i) {
-            case 0:
-                version = new Zero();
-                break;
-            case 1:
-                version = new One();
-                break;
-            case 2:
-                version = new Two();
-
-
-        }
-        item = version.getItems()[0];
-        material = version.getMaterials()[0];
-        bookshelves = version.getMaxBookShelves();
-    }
-
-    private static void setItem(String s) {
-        item = s;
-    }
-
-    private static void setMaterial(String s) {
-        material = s;
-    }
-
-    private static void setBookshelves(int i) {
-        bookshelves = i;
-    }
-
-    private static void setMaxAdvances(int i) {
-        maxAdvances = i;
-    }
 
     public static int getMaxAdvances() {
         return maxAdvances;

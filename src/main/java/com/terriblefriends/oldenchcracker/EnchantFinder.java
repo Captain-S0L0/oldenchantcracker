@@ -16,13 +16,15 @@ public class EnchantFinder extends Thread {
     private final Version version;
     private final HashMap<Integer, EnchantData> desiredEnchants;
     private final boolean exactly;
+    private final int maxAdvances;
+    private final boolean advancedAdvancements;
     private int resultAdvances = -1;
     private int resultSlot = -1;
     private long resultSeed = -1;
     private int[] resultLevels = new int[0];
     private boolean failed = false;
 
-    public EnchantFinder(String item, String material, long randomSeed, Version version, int books, HashMap<Integer, EnchantData> desiredEnchants, boolean exactly) {
+    public EnchantFinder(String item, String material, long randomSeed, Version version, int books, int maxAdvances, HashMap<Integer, EnchantData> desiredEnchants, boolean exactly, boolean advancedAdvancements) {
         this.materialEnchantability = version.getMaterialEnchantability(material);
         if (this.materialEnchantability == -1) {
             System.out.println("ERROR! Invalid material!");
@@ -35,6 +37,8 @@ public class EnchantFinder extends Thread {
         this.desiredEnchants = desiredEnchants;
         this.exactly = exactly;
         this.books = books;
+        this.maxAdvances = advancedAdvancements ? maxAdvances * 3 : maxAdvances;
+        this.advancedAdvancements = advancedAdvancements;
     }
 
     @Override
@@ -136,7 +140,7 @@ public class EnchantFinder extends Thread {
                 //System.out.println("set seed "+(slotResetSeed ^ randomMultiplier));
             }
 
-            for (int swap = 0; swap < 3; swap++) { //calculate levels 3 times because Minecraft
+            for (int swap = 0; swap < (advancedAdvancements ? 1 : 3); swap++) { //calculate levels 3 times because Minecraft
                 this.random.nextLong();
                 levels = version.getEnchantLevels(this.random, this.books);
             }
