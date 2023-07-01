@@ -415,7 +415,7 @@ public class Main {
 
         });
         crackButton.setEnabled(false);
-        crackButton.setBounds(20, 100, crackButton.getPreferredSize().width, crackButton.getPreferredSize().height);
+        setPosition(crackButton, 20, 100);
         crackerPanel.add(crackButton);
 
         for (int y = 0; y < 3; y++) {
@@ -739,7 +739,9 @@ public class Main {
     }
 
     private static void setPosition(JComponent component, int x, int y) {
-        component.setBounds(x, y, component.getPreferredSize().width, component.getPreferredSize().height);
+        //we make everything slightly wider to font changes with resolution don't screw everything up, and I'm not rewriting this to use a layout manager
+        int width = component.getPreferredSize().width + 5;
+        component.setBounds(x, y, width, component.getPreferredSize().height);
     }
 
 
@@ -796,7 +798,7 @@ public class Main {
                 }
 
                 levelSelect = new JComboBox<>(levels);
-                setPosition(levelSelect, 475, y-3);
+                setPosition(levelSelect, 480, y-3);
                 components[2] = levelSelect;
                 manipulatorPanel.add(levelSelect);
                 y+= 30;
