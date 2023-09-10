@@ -13,6 +13,8 @@ A video explaining how to use this tool can be found [here](https://www.youtube.
 
 If you have any issues make sure to do the following:
 * You are running both Minecraft and the finder with the same Java version, as changes in Java's HashMap functions can influence the enchanting process.
-* You are NOT drag-clicking the item inside the GUI slot in 1.5+
-* Use the ROBOT option if the ALT+PRTSRC searcher is being problematic
+* You are NOT drag-clicking the item inside the GUI slot in 1.5+.
+* Use the ROBOT option if the ALT+PRTSRC searcher is being problematic.
+
+
 If you still have problems, feel free to contact me on Discord @captain_s0l0, or open an issue.
