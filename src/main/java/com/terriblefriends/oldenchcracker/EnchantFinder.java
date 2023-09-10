@@ -8,7 +8,7 @@ import java.io.ObjectOutputStream;
 import java.util.*;
 
 public class EnchantFinder extends Thread {
-    private static final long randomMultiplier = 0x5DEECE66DL;
+    private static final long RANDOM_MULTIPLIER = 0x5DEECE66DL;
     private final int materialEnchantability;
     private final String item;
     private final Random random;
@@ -27,11 +27,10 @@ public class EnchantFinder extends Thread {
     public EnchantFinder(String item, String material, long randomSeed, Version version, int books, int maxAdvances, HashMap<Integer, EnchantData> desiredEnchants, boolean exactly, boolean advancedAdvancements) {
         this.materialEnchantability = version.getMaterialEnchantability(material);
         if (this.materialEnchantability == -1) {
-            System.out.println("ERROR! Invalid material!");
-            this.failed = true;
+            throw new RuntimeException("ERROR! Invalid material!");
         }
         this.item = item;
-        this.random = new Random(randomSeed^randomMultiplier);
+        this.random = new Random(randomSeed^ RANDOM_MULTIPLIER);
         this.random.nextLong();
         this.version = version;
         this.desiredEnchants = desiredEnchants;
@@ -45,11 +44,11 @@ public class EnchantFinder extends Thread {
     public void run() {
 
         //setup levels once first in case enchants are available on current selection
-        int[] levels = version.getEnchantLevels(this.random, this.books);
+        int[] levels = this.version.getEnchantLevels(this.random, this.books);
 
         //System.out.println(levels[0]+","+levels[1]+","+levels[2]);
 
-        for (int advances = 0; advances < Main.getMaxAdvances(); advances++) {
+        for (int advances = 0; advances < this.maxAdvances; advances++) {
             long slotResetSeed = getSeed(this.random);
 
             //System.out.println();
@@ -59,54 +58,24 @@ public class EnchantFinder extends Thread {
             for (int slot = 0; slot < 3; slot++) {
                 //System.out.println("slot "+slot);
                 //this.random.setSeed(slotResetSeed ^ randomMultiplier);
-                int enchantability = this.materialEnchantability;
-                enchantability = 1 + this.random.nextInt((enchantability >> 1)+1) + this.random.nextInt((enchantability >> 1)+1);
-                int enchantStep1 = enchantability + levels[slot];
-                float enchantStep2 = (this.random.nextFloat() + this.random.nextFloat() - 1.0F) * 0.25F;
-                int enchantStep3 = (int)((float)enchantStep1 * (1.0F + enchantStep2) + 0.5F);
-                HashMap<Integer, EnchantData> enchantList = null;
-                HashMap<Integer, EnchantData> enchantmentData = version.mapEnchantmentData(enchantStep3, item);
-
-                if (enchantmentData != null && !enchantmentData.isEmpty()) {
-                    EnchantData selectedEnchant = getWeightedEnchantment(this.random, enchantmentData.values());
-                    if (selectedEnchant != null) {
-                        //System.out.println("1st enchantment "+selectedEnchant.getEnchant().getName()+" @ level "+selectedEnchant.getLevel());
-                        //System.out.println("data size "+enchantmentData.size());
-
-                        //for (EnchantData data : enchantmentData.values()) {
-                        //    System.out.println(data.getEnchant().getName()+" @ level "+data.getLevel()+" weight "+data.getEnchant().getWeight());
-                        //}
-
-                        enchantList = new HashMap<>();
-                        enchantList.put(selectedEnchant.getEnchant().getId(), selectedEnchant);
-                        for (int multipleChance = enchantStep3 >> 1; this.random.nextInt(50) < multipleChance; multipleChance >>= 1) {
-                            Iterator<Integer> multipleIterator = enchantmentData.keySet().iterator();
-                            while (multipleIterator.hasNext()) {
-                                int multipleId = multipleIterator.next();
-                                for (EnchantData data : enchantList.values()) {
-                                    if (!data.getEnchant().isCompatibleEnchant(multipleId)) {
-                                        multipleIterator.remove();
-                                    }
-                                }
-                            }
-
-                            if (!enchantmentData.isEmpty()) {
-                                EnchantData enchant = getWeightedEnchantment(this.random, enchantmentData.values());
-                                enchantList.put(enchant.getEnchant().getId(), enchant);
-                                //System.out.println("added extra enchant "+enchant.getEnchant().getName()+" @ level "+enchant.getLevel());
-                            }
-                        }
-                    }
-                }
+                List<EnchantData> enchantList = this.version.getItemEnchantments(this.random, this.materialEnchantability, this.item, levels[slot]);
 
                 if (enchantList != null) {
                     boolean valid = false;
 
-                    if (exactly) {
-                        if (enchantList.size() == desiredEnchants.size()) {
+                    if (this.exactly) {
+                        if (enchantList.size() == this.desiredEnchants.size()) {
                             valid = true;
-                            for (EnchantData testFor : desiredEnchants.values()) {
-                                if (!Objects.equals(enchantList.get(testFor.getEnchant().getId()), testFor)) {
+                            for (EnchantData testFor : this.desiredEnchants.values()) {
+                                boolean contains = false;
+                                for (EnchantData data : enchantList) {
+                                    if (data.getEnchant() == testFor.getEnchant() && data.getLevel() == testFor.getLevel()) {
+                                        contains = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!contains) {
                                     valid = false;
                                     break;
                                 }
@@ -115,9 +84,16 @@ public class EnchantFinder extends Thread {
                     }
                     else {
                         valid = true;
-                        for (EnchantData testFor : desiredEnchants.values()) {
-                            int testForId = testFor.getEnchant().getId();
-                            if (!enchantList.containsKey(testForId) || enchantList.get(testForId).getLevel() < testFor.getLevel()) {
+                        for (EnchantData testFor : this.desiredEnchants.values()) {
+                            boolean contains = false;
+                            for (EnchantData data : enchantList) {
+                                if (data.getEnchant() == testFor.getEnchant() && data.getLevel() >= testFor.getLevel()) {
+                                    contains = true;
+                                    break;
+                                }
+                            }
+
+                            if (!contains) {
                                 valid = false;
                                 break;
                             }
@@ -125,27 +101,36 @@ public class EnchantFinder extends Thread {
                     }
 
                     if (valid) {
-                        resultLevels = levels;
+                        for (EnchantData data : enchantList) {
+                            System.out.println("Found enchantment "+data.getEnchant().getName()+" @ level "+data.getLevel());
+                        }
+
+                        this.resultLevels = levels;
                         this.resultAdvances = advances;
                         this.resultSlot = slot;
 
+                        if (this.version.getCrackType() == Version.CrackType.LEVELS) {
+                            this.random.nextLong();//Do this twice because 1.3+ changed advances slightly
+                            this.version.getEnchantLevels(this.random, this.books);
+                        }
                         this.random.nextLong();//DON'T DO THIS TWICE BECAUSE WE DO IT AGAIN TO START THE NEXT SEARCH
-                        levels = version.getEnchantLevels(this.random, this.books);
+                        this.version.getEnchantLevels(this.random, this.books);
 
                         this.resultSeed = getSeed(this.random);
                         return;
                     }
                 }
-                this.random.setSeed(slotResetSeed ^ randomMultiplier);
+                this.random.setSeed(slotResetSeed ^ RANDOM_MULTIPLIER);
                 //System.out.println("set seed "+(slotResetSeed ^ randomMultiplier));
             }
 
-            for (int swap = 0; swap < (advancedAdvancements ? 1 : 3); swap++) { //calculate levels 3 times because Minecraft
+            for (int swap = 0; swap < (this.advancedAdvancements ? 1 : 3); swap++) { //calculate levels 3 times because Minecraft
                 this.random.nextLong();
-                levels = version.getEnchantLevels(this.random, this.books);
+                levels = this.version.getEnchantLevels(this.random, this.books);
             }
             //System.out.println(levels[0]+","+levels[1]+","+levels[2]);
         }
+        System.out.println("Failed to find enchant in "+this.maxAdvances+" advances!");
         this.resultAdvances = -9001;
         this.failed = true;
     }
@@ -168,28 +153,6 @@ public class EnchantFinder extends Thread {
 
     public int[] getResultLevels() {
         return this.resultLevels;
-    }
-
-    private static EnchantData getWeightedEnchantment(Random random, Collection<EnchantData> values) {
-        int totalWeight = 0;
-        for (EnchantData enchant : values) {
-            totalWeight += enchant.getEnchant().getWeight();
-        }
-        int selectedWeight = random.nextInt(totalWeight);
-
-        Iterator<EnchantData> weightIterator = values.iterator();
-        EnchantData selectedEnchant;
-        do {
-            if (!weightIterator.hasNext()) {
-                return null;
-            }
-
-            selectedEnchant = weightIterator.next();
-            selectedWeight -= selectedEnchant.getEnchant().getWeight();
-        }
-        while (selectedWeight >= 0);
-
-        return selectedEnchant;
     }
 
     private static long getSeed(Random random) {

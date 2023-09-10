@@ -6,14 +6,13 @@ import com.terriblefriends.oldenchcracker.thingmanagers.*;
 
 import java.util.*;
 
-public class Zero implements Version {
-
-    //Tools for Minecraft version Beta 1.9 Prerelease 4
+public class Three implements Version {
+    //Tools for Minecraft versions 12w18a (1.3 snap) to 12w21b (1.3 snap)
 
     private static final EnchantmentManager ENCHANTMENT_MANAGER = new EnchantmentManager();
     private static final ItemManager ITEM_MANAGER = new ItemManager();
     private static final MaterialManager MATERIAL_MANAGER = new MaterialManager();
-    
+
     static {
         ENCHANTMENT_MANAGER.register("Protection", 0, 10, 4, l -> 1 + (l - 1) * 16, l -> (1 + (l - 1) * 16) + 20, new int[]{1, 3, 4});
         ENCHANTMENT_MANAGER.register("Fire Protection", 1, 5, 4, l -> 10 + (l - 1) * 8, l -> (10 + (l - 1) * 8) + 12, new int[]{0, 3, 4});
@@ -29,9 +28,13 @@ public class Zero implements Version {
         ENCHANTMENT_MANAGER.register("Fire Aspect", 20, 2, 2, l -> 10 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
         ENCHANTMENT_MANAGER.register("Looting", 21, 2, 3, l -> 20 + (l - 1) * 12, l -> (1 + l * 10) + 50, null);
         ENCHANTMENT_MANAGER.register("Efficiency", 32, 10, 5, l -> 1 + 15 * (l - 1), l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("Silk Touch", 33, 1, 1, l -> 25, l -> (1 + l * 10) + 50, null);
+        ENCHANTMENT_MANAGER.register("Silk Touch", 33, 1, 1, l -> 25, l -> (1 + l * 10) + 50, new int[]{35});
         ENCHANTMENT_MANAGER.register("Unbreaking", 34, 5, 3, l -> 5 + (l - 1) * 10, l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("Fortune", 35, 2, 3, l -> 20 + (l - 1) * 12, l -> (1 + l * 10) + 50, null);
+        ENCHANTMENT_MANAGER.register("Fortune", 35, 2, 3, l -> 20 + (l - 1) * 12, l -> (1 + l * 10) + 50, new int[]{33});
+        ENCHANTMENT_MANAGER.register("Power", 48, 10, 5, l -> 1 + (l - 1) * 10, l -> (1 + (l - 1) * 10) + 15, null);
+        ENCHANTMENT_MANAGER.register("Punch", 49, 2, 2, l -> 12 + (l - 1) * 20, l -> (12 + (l - 1) * 20) + 25, null);
+        ENCHANTMENT_MANAGER.register("Flame", 50, 2, 1, l -> 20, l -> 50, null);
+        ENCHANTMENT_MANAGER.register("Infinity", 51, 1, 1, l -> 20, l -> 50, null);
 
         ITEM_MANAGER.register("Helmet", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 5, 6});
         ITEM_MANAGER.register("Chestplate", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4});
@@ -41,17 +44,19 @@ public class Zero implements Version {
         ITEM_MANAGER.register("Pickaxe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
         ITEM_MANAGER.register("Axe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
         ITEM_MANAGER.register("Shovel", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
+        ITEM_MANAGER.register("Bow", new int[]{10}, new int[]{48, 49, 50, 51});
 
-        MATERIAL_MANAGER.register(0, "ToolWood", 1);
+        MATERIAL_MANAGER.register(0, "ToolWood", 15);
         MATERIAL_MANAGER.register(1, "ToolStone", 5);
         MATERIAL_MANAGER.register(2, "ToolIron", 14);
-        MATERIAL_MANAGER.register(3, "ToolDiamond", 12);
+        MATERIAL_MANAGER.register(3, "ToolDiamond", 10);
         MATERIAL_MANAGER.register(4, "ToolGold", 22);
-        MATERIAL_MANAGER.register(5, "ArmorLeather", 1);
+        MATERIAL_MANAGER.register(5, "ArmorLeather", 15);
         MATERIAL_MANAGER.register(6, "ArmorChain", 12);
         MATERIAL_MANAGER.register(7, "ArmorIron", 9);
         MATERIAL_MANAGER.register(8, "ArmorDiamond", 10);
         MATERIAL_MANAGER.register(9, "ArmorGold", 25);
+        MATERIAL_MANAGER.register(10, "Bow", 1);
     }
 
     @Override
@@ -98,13 +103,13 @@ public class Zero implements Version {
     @Override
     public int[] getEnchantLevels(Random random, int books) {
         int[] levels = new int[3];
-        int booksStep1 = 1 + random.nextInt((books >> 1)+1) + random.nextInt(books + 1);
+        int booksStep1 = 1 + (books >> 1) + random.nextInt(books + 1);
         int booksStep2 = random.nextInt(5) + booksStep1;
         levels[0] = ((booksStep2 >> 1) + 1);
-        booksStep1 = 1 + random.nextInt((books >> 1)+1) + random.nextInt(books + 1);
+        booksStep1 = 1 + (books >> 1) + random.nextInt(books + 1);
         booksStep2 = random.nextInt(5) + booksStep1;
         levels[1] = (booksStep2 * 2 / 3 + 1);
-        booksStep1 = 1 + random.nextInt((books >> 1)+1) + random.nextInt(books + 1);
+        booksStep1 = 1 + (books >> 1) + random.nextInt(books + 1);
         booksStep2 = random.nextInt(5) + booksStep1;
         levels[2] = booksStep2;
         return levels;
@@ -114,32 +119,25 @@ public class Zero implements Version {
     public void reverseExtremes(RandomReverser reverser, int advances, boolean isLow) {
         for (int i = 0; i < (advances * 3)+2; i++) {
             reverser.consumeNextLongCalls(1);
-            reverser.consumeNextIntCalls(1, 16);
             reverser.consumeNextIntCalls(1, 31);
             reverser.consumeNextIntCalls(1, 5);
-            reverser.consumeNextIntCalls(1, 16);
             reverser.consumeNextIntCalls(1, 31);
             reverser.consumeNextIntCalls(1, 5);
-            reverser.consumeNextIntCalls(1, 16);
             reverser.consumeNextIntCalls(1, 31);
             reverser.consumeNextIntCalls(1, 5);
         }
 
         reverser.consumeNextLongCalls(1);
-        reverser.consumeNextIntCalls(1, 16);
         reverser.consumeNextIntCalls(1, 31);
         reverser.consumeNextIntCalls(1, 5);
-        reverser.consumeNextIntCalls(1, 16);
         reverser.consumeNextIntCalls(1, 31);
         reverser.consumeNextIntCalls(1, 5);
 
         if (isLow) {
-            reverser.addNextIntCall(16, 0, 0);
             reverser.addNextIntCall(31, 0, 0);
             reverser.addNextIntCall(5, 0, 0);
         }
         else {
-            reverser.addNextIntCall(16, 15, 15);
             reverser.addNextIntCall(31, 30, 30);
             reverser.addNextIntCall(5, 4, 4);
         }
@@ -147,7 +145,7 @@ public class Zero implements Version {
 
     @Override
     public int getExtremesNeeded() {
-        return 5;
+        return 11;
     }
 
     @Override
@@ -212,7 +210,7 @@ public class Zero implements Version {
 
     @Override
     public CrackType getCrackType() {
-        return CrackType.GALACTIC;
+        return CrackType.EXTREMES;
     }
 
     private static EnchantData getWeightedEnchantment(Random random, Collection<EnchantData> values) {

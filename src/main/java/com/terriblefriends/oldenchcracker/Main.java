@@ -1,9 +1,8 @@
 package com.terriblefriends.oldenchcracker;
 
-import com.terriblefriends.oldenchcracker.versions.One;
-import com.terriblefriends.oldenchcracker.versions.Two;
-import com.terriblefriends.oldenchcracker.versions.Version;
-import com.terriblefriends.oldenchcracker.versions.Zero;
+import com.terriblefriends.oldenchcracker.thingmanagers.Enchantment;
+import com.terriblefriends.oldenchcracker.thingmanagers.Item;
+import com.terriblefriends.oldenchcracker.versions.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,40 +22,42 @@ import java.util.concurrent.Future;
 
 public class Main {
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
-    private static final int maxLevels = 50;
+
     /*
-    b1.9pre4 - fortune + silk
-    b1.9pre5 - wooden tool enchantability increased
-    1.1 - bows can be enchanted, level formula change
-    12w18a - internal server
-    12w22a (1.3) - 50 -> 30 level change
-    13w50a (1.4.6) - chestplates can receive thorns
-    13w36a (1.7) - fishing rods can be enchanted, armor + bows can receive unbreaking
+    ZERO b1.9pre4 - fortune + silk
+    ONE b1.9pre5 - wooden tool enchantability increased
+    TWO 1.1 - bows can be enchanted, level formula change
+    THREE 12w18a - internal server
+    FOUR 12w22a (1.3) - 50 -> 30 level change
+    FIVE 12w49a (1.4.6) - enchanted books added
+    SIX 12w50a (1.4.6) - chestplates can receive thorns, shears can receive silk
+    SEVEN 13w36a (1.7) - fishing rods can be enchanted, armor + bows can receive unbreaking
+    EIGHT 13w37a (1.7) - changes to how enchantments are selected for books
     14w02a (1.8) - end of this tool
      */
 
-    private static final String[] versionStrings = new String[]{"b1.9pre4", "b1.9pre5 - 1.0", "1.1 - 12w17a (1.3)"};
-    private static Version version = new Zero();
-    private static final HashMap<EnchantmentList.Enchant, JComponent[]> manipulatorEnchantmentSelectorComponents = new HashMap<>();
-    private static String item = "";
-    private static String material = "";
-    private static int bookshelves = version.getMaxBookShelves();
-    private static final JTabbedPane tabs = new JTabbedPane();
-    private static final JPanel helpPanel = new JPanel();
-    private static final JPanel setupPanel = new JPanel();
-    private static final JPanel crackerPanel = new JPanel();
-    private static final JPanel manipulatorPanel = new JPanel();
-    private static long rngSeed = -1;
-    private static long postRngSeed = -1;
-    private static int maxAdvances = 10000;
-    private static boolean advancedAdvances = false;
-    private static Future threadTask = null;
+    private static final String[] VERSION_STRINGS = new String[]{"b1.9pre4", "b1.9pre5 - 1.0", "1.1 - 12w17b (1.3)", "12w18a (1.3) - 12w21b (1.3)", "12w22a (1.3) - 12w48a (1.4.6)", "12w49a", "12w50a (1.4.6) - 1.6.4", "13w36a - 13w36b", "13w37a (1.7) - 1.7.10"};
+    private static Version VERSION = new Zero();
+    private static final HashMap<Enchantment, JComponent[]> MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS = new HashMap<>();
+    private static int BOOKSHELVES = VERSION.getMaxBookShelves();
+    private static final JTabbedPane TABS = new JTabbedPane();
+    private static final JPanel HELP_PANEL = new JPanel();
+    private static final JPanel SETUP_PANEL = new JPanel();
+    private static final JPanel GALACTIC_CRACKER_PANEL = new JPanel();
+    private static final JPanel LEVEL_CRACKER_PANEL = new JPanel();
+    private static final JPanel EXTREMES_CRACKER_PANEL = new JPanel();
+    private static final JPanel MANIPULATOR_PANEL = new JPanel();
+    private static long RNG_SEED = -1;
+    private static long POST_RNG_SEED = -1;
+    private static int MAX_ADVANCES = 10000;
+    private static boolean ADVANCED_ADVANCES = false;
+    private static Future THREAD_TASK = null;
 
     public static void main(String[] args) {
 
-        System.out.println("Hello world!");
+        System.out.println("Preparing to do a little trolling...");
 
-        JFrame frame = new JFrame("Pre 1.3 Enchantment Cracker");
+        JFrame frame = new JFrame("Pre 1.8 Enchantment Cracker");
 
         URL iconUrl = Main.class.getResource("/icon.png");
         frame.setIconImage(Toolkit.getDefaultToolkit().getImage(iconUrl));
@@ -66,22 +67,23 @@ public class Main {
 
         createHelpPanel();
         createSetupPanel();
-        tabs.addTab("Help", helpPanel);
-        tabs.addTab("Setup", setupPanel);
+        TABS.addTab("Help", HELP_PANEL);
+        TABS.addTab("Setup", SETUP_PANEL);
 
-        frame.add(tabs);
+        frame.add(TABS);
 
         frame.setVisible(true);
     }
 
     private static void createHelpPanel() {
-        helpPanel.setLayout(null);
-        helpPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        HELP_PANEL.setName("Help Panel");
+        HELP_PANEL.setLayout(null);
+        HELP_PANEL.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
         JLabel helpLabel;
-        helpLabel = new JLabel("Welcome to Enchantment Cracking before Minecraft 1.3, by Captain_S0L0!");
+        helpLabel = new JLabel("Welcome to Enchantment Cracking before Minecraft 1.8, by Captain_S0L0!");
         setPosition(helpLabel, 10, 10);
-        helpPanel.add(helpLabel);
+        HELP_PANEL.add(helpLabel);
 
         helpLabel = new JLabel("You can find a tutorial on its usage here.");
         setPosition(helpLabel, 10, 30);
@@ -91,176 +93,143 @@ public class Main {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
-                    Desktop.getDesktop().browse(new URI("https://youtu.be/elcx1i7Zauc"));
+                    Desktop.getDesktop().browse(new URI("https://youtu.be/AufoTbXW3_0"));
 
                 } catch (IOException | URISyntaxException e1) {
                     e1.printStackTrace();
                 }
             }
         });
-        helpPanel.add(helpLabel);
+        HELP_PANEL.add(helpLabel);
 
-        helpLabel = new JLabel("If you're too boring to watch a 5 minute video, then here's a rundown:");
+        helpLabel = new JLabel("The github page can be found here.");
         setPosition(helpLabel, 10, 50);
-        helpPanel.add(helpLabel);
+        helpLabel.setForeground(Color.BLUE.darker());
+        helpLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        helpLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                try {
+                    Desktop.getDesktop().browse(new URI("https://github.com/Captain-S0L0/oldenchantcracker"));
 
-        helpLabel = new JLabel("1) Select your version and the amount of bookshelves you have in the \"Setup tab\", and click \"Start!\".");
-        setPosition(helpLabel, 10, 70);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("2) Make sure you have all items you want to enchant in your inventory, and enough XP.");
-        setPosition(helpLabel, 10, 90);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("     The GUI must stay open throughout this entire process.");
-        setPosition(helpLabel, 10, 110);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("4) Open the GUI and place an item to be enchanted into the item slot.");
-        setPosition(helpLabel, 10, 130);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("5) See which slots display 4 words, and check the \"4 Words ?\" checkmark accordingly.");
-        setPosition(helpLabel, 10, 150);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("     Then, look at the first letters of each word in Standard Galactic.");
-        setPosition(helpLabel, 10, 170);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("     Enter what number each word corresponds to in the chart to the right.");
-        setPosition(helpLabel, 10, 190);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("6) Enter the level cost each slot displays in the \"Level:\" column.");
-        setPosition(helpLabel, 10, 210);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("7) When all data is entered, the \"Crack RNG\" button will become available. Click it.");
-        setPosition(helpLabel, 10, 230);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("     LattiCG will take a bit, but when it is done, it (hopefully) will display \"Cracked RNG!\".");
-        setPosition(helpLabel, 10, 250);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("     If it does not, then double check that everything you entered is correct.");
-        setPosition(helpLabel, 10, 270);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("8) Proceed to the \"Manipulator\" tab. Select the tool and material of what you're enchanting.");
-        setPosition(helpLabel, 10, 290);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("     Select which enchantments you want, and what level you want them at.");
-        setPosition(helpLabel, 10, 310);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("     If you want those enchants exactly, check the \"Exactly\" checkmark.");
-        setPosition(helpLabel, 10, 330);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("     Otherwise, the finder will find at least those enchantments and levels, or better.");
-        setPosition(helpLabel, 10, 350);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("9) Click the \"Find Enchants\" button. If a valid candidate is found, it will say so.");
-        setPosition(helpLabel, 10, 370);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("     If one is not found, then you can either raise the \"Max Advances\" value, or try something else.");
-        setPosition(helpLabel, 10, 390);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("10) For each advance, click the item out and back into the slot.");
-        setPosition(helpLabel, 10, 410);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("11) When you have made the correct amount of advancements, check that the levels displayed match");
-        setPosition(helpLabel, 10, 430);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("     what is inside the brackets. (e.g. \"[14,24,47]\") If they match, select the slot displayed.");
-        setPosition(helpLabel, 10, 450);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("     (1 is the top, 2 is the middle, 3 is the bottom.))");
-        setPosition(helpLabel, 10, 470);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("12) You should now have your desired enchants. Click the \"Enchantment Done!\" button.");
-        setPosition(helpLabel, 10, 490);
-        helpPanel.add(helpLabel);
-
-        helpLabel = new JLabel("13) If enchanting more, insert the next item, and repeat from Step 8.");
-        setPosition(helpLabel, 10, 510);
-        helpPanel.add(helpLabel);
+                } catch (IOException | URISyntaxException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+        HELP_PANEL.add(helpLabel);
     }
 
     private static void createSetupPanel() {
-        setupPanel.setLayout(null);
-        setupPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        SETUP_PANEL.setName("Setup Panel");
+        SETUP_PANEL.setLayout(null);
+        SETUP_PANEL.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JLabel setupLabel;
         setupLabel = new JLabel("Version:");
         setPosition(setupLabel, 10,10);
-        setupPanel.add(setupLabel);
+        SETUP_PANEL.add(setupLabel);
 
         setupLabel = new JLabel("Shelves:");
         setPosition(setupLabel, 10,40);
-        setupPanel.add(setupLabel);
+        SETUP_PANEL.add(setupLabel);
 
         JTextField setupBookSelector = new JTextField(3);
-        setupBookSelector.setText(String.valueOf(bookshelves));
+        setupBookSelector.setText(String.valueOf(BOOKSHELVES));
         setPosition(setupBookSelector, 70, 39);
-        setupPanel.add(setupBookSelector);
+        SETUP_PANEL.add(setupBookSelector);
 
         JButton setupFinalizeButton = new JButton("Start!");
         setPosition(setupFinalizeButton, 30, 75);
-        setupPanel.add(setupFinalizeButton);
+        SETUP_PANEL.add(setupFinalizeButton);
 
-        JComboBox<String> setupVersionSelector = new JComboBox<>(versionStrings);
+        JComboBox<String> setupVersionSelector = new JComboBox<>(VERSION_STRINGS);
         setupVersionSelector.addActionListener((event) -> {
             Object selection = setupVersionSelector.getSelectedItem();
-            for (int i = 0; i < versionStrings.length; i++) {
-                if (Objects.equals(selection, versionStrings[i])) {
+            for (int i = 0; i < VERSION_STRINGS.length; i++) {
+                if (Objects.equals(selection, VERSION_STRINGS[i])) {
                     switch (i) {
                         case 0:
-                            version = new Zero();
+                            VERSION = new Zero();
                             break;
                         case 1:
-                            version = new One();
+                            VERSION = new One();
                             break;
                         case 2:
-                            version = new Two();
-
+                            VERSION = new Two();
+                            break;
+                        case 3:
+                            VERSION = new Three();
+                            break;
+                        case 4:
+                            VERSION = new Four();
+                            break;
+                        case 5:
+                            VERSION = new Five();
+                            break;
+                        case 6:
+                            VERSION = new Six();
+                            break;
+                        case 7:
+                            VERSION = new Seven();
+                            break;
+                        case 8:
+                            VERSION = new Eight();
+                            break;
 
                     }
-                    item = version.getItems()[0];
-                    material = version.getMaterials()[0];
-                    bookshelves = version.getMaxBookShelves();
-                    setupBookSelector.setText(String.valueOf(bookshelves));
+                    BOOKSHELVES = VERSION.getMaxBookShelves();
+                    setupBookSelector.setText(String.valueOf(BOOKSHELVES));
                 }
             }
         });
         setPosition(setupVersionSelector, 63,7);
-        setupPanel.add(setupVersionSelector);
+        SETUP_PANEL.add(setupVersionSelector);
 
         setupFinalizeButton.addActionListener((event) -> {
-            setupFinalizeButton.setEnabled(false);
+            Set<Component> tabsToClose = new HashSet<>();
+            for (Component c : TABS.getComponents()) {
+                if (c.getName().equals("Galactic Cracker Panel") ||
+                        c.getName().equals("Level Cracker Panel") ||
+                        c.getName().equals("Manipulator Panel") ||
+                        c.getName().equals("Extremes Cracker Panel")) {
+                    tabsToClose.add(c);
+                }
+            }
+            for (Component c : tabsToClose) {
+                TABS.remove(c);
+            }
+            /*setupFinalizeButton.setEnabled(false);
             setupVersionSelector.setEnabled(false);
-            setupBookSelector.setEditable(false);
-            createCrackerPanel();
-            createManipulatorMenu();
-            tabs.addTab("RNG Cracker", crackerPanel);
-            tabs.addTab("Manipulator", manipulatorPanel);
-            tabs.setSelectedComponent(crackerPanel);
+            setupBookSelector.setEditable(false);*/
+
+            if (VERSION.getCrackType() == Version.CrackType.LEVELS) {
+                createLevelCrackerPanel();
+                TABS.addTab("Level Cracker", LEVEL_CRACKER_PANEL);
+                TABS.setSelectedComponent(LEVEL_CRACKER_PANEL);
+            }
+            else if (VERSION.getCrackType() == Version.CrackType.EXTREMES) {
+                createExtremesCrackerPanel();
+                TABS.addTab("Extremes Cracker", EXTREMES_CRACKER_PANEL);
+                TABS.setSelectedComponent(EXTREMES_CRACKER_PANEL);
+            }
+            else {
+                createGalacticCrackerPanel();
+                TABS.addTab("Galactic Cracker", GALACTIC_CRACKER_PANEL);
+                TABS.setSelectedComponent(GALACTIC_CRACKER_PANEL);
+
+                createExtremesCrackerPanel();
+                TABS.addTab("Extremes Cracker", EXTREMES_CRACKER_PANEL);
+            }
+
+            createManipulatorPanel();
+            TABS.addTab("Manipulator", MANIPULATOR_PANEL);
         });
 
         setupBookSelector.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if (e.getKeyChar() < 48 || e.getKeyChar() > 57 || Integer.parseInt(setupBookSelector.getText()+e.getKeyChar()) > version.getMaxBookShelves()) {
+                if (e.getKeyChar() < 48 || e.getKeyChar() > 57 || Integer.parseInt(setupBookSelector.getText()+e.getKeyChar()) > VERSION.getMaxBookShelves()) {
                     e.consume();
                 }
             }
@@ -273,81 +242,76 @@ public class Main {
                 String text = setupBookSelector.getText();
                 if (text.length() == 0) {
                     setupFinalizeButton.setEnabled(false);
-                    bookshelves = -1;
+                    BOOKSHELVES = -1;
                 }
                 else {
                     setupFinalizeButton.setEnabled(true);
-                    bookshelves = Integer.parseInt(text);
+                    BOOKSHELVES = Integer.parseInt(text);
                 }
             }
         });
     }
 
-    private static void createCrackerPanel() {
-        crackerPanel.setLayout(null);
-        crackerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    private static void createGalacticCrackerPanel() {
+        GALACTIC_CRACKER_PANEL.removeAll();
+        GALACTIC_CRACKER_PANEL.setName("Galactic Cracker Panel");
+        GALACTIC_CRACKER_PANEL.setLayout(null);
+        GALACTIC_CRACKER_PANEL.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         URL galacticChartUrl = Main.class.getResource("/galacticChart.png");
         ImageIcon chartImage = new ImageIcon(galacticChartUrl);
         JLabel chartLabel = new JLabel(chartImage);
         setPosition(chartLabel, 400,25);
-        crackerPanel.add(chartLabel);
+        GALACTIC_CRACKER_PANEL.add(chartLabel);
 
 
         JCheckBox[] fourWordCheck = new JCheckBox[3];
-        JTextField[] slot1Words = new JTextField[4];
-        JTextField[] slot2Words = new JTextField[4];
-        JTextField[] slot3Words = new JTextField[4];
         JTextField[] slotLevels = new JTextField[3];
-        JTextField[][] slotWords = new JTextField[3][];
-        slotWords[0] = slot1Words;
-        slotWords[1] = slot2Words;
-        slotWords[2] = slot3Words;
+        JTextField[][] slotWords = new JTextField[3][4];
 
-        JLabel crackerLabel;
-        crackerLabel = new JLabel("4 words?");
-        setPosition(crackerLabel, 10,5);
-        crackerPanel.add(crackerLabel);
-        crackerLabel = new JLabel("Word 1:");
-        setPosition(crackerLabel, 80,5);
-        crackerPanel.add(crackerLabel);
-        crackerLabel = new JLabel("Word 2:");
-        setPosition(crackerLabel, 140,5);
-        crackerPanel.add(crackerLabel);
-        crackerLabel = new JLabel("Word 3:");
-        setPosition(crackerLabel, 200,5);
-        crackerPanel.add(crackerLabel);
-        crackerLabel = new JLabel("Word 4:");
-        setPosition(crackerLabel, 260,5);
-        crackerPanel.add(crackerLabel);
-        crackerLabel = new JLabel("Level:");
-        setPosition(crackerLabel, 325,5);
-        crackerPanel.add(crackerLabel);
-        crackerLabel = new JLabel("(THX Crafterdark)");
-        setPosition(crackerLabel, 440, 490);
-        crackerPanel.add(crackerLabel);
+        JLabel galacticCrackerLabel;
+        galacticCrackerLabel = new JLabel("4 words?");
+        setPosition(galacticCrackerLabel, 10,5);
+        GALACTIC_CRACKER_PANEL.add(galacticCrackerLabel);
+        galacticCrackerLabel = new JLabel("Word 1:");
+        setPosition(galacticCrackerLabel, 80,5);
+        GALACTIC_CRACKER_PANEL.add(galacticCrackerLabel);
+        galacticCrackerLabel = new JLabel("Word 2:");
+        setPosition(galacticCrackerLabel, 140,5);
+        GALACTIC_CRACKER_PANEL.add(galacticCrackerLabel);
+        galacticCrackerLabel = new JLabel("Word 3:");
+        setPosition(galacticCrackerLabel, 200,5);
+        GALACTIC_CRACKER_PANEL.add(galacticCrackerLabel);
+        galacticCrackerLabel = new JLabel("Word 4:");
+        setPosition(galacticCrackerLabel, 260,5);
+        GALACTIC_CRACKER_PANEL.add(galacticCrackerLabel);
+        galacticCrackerLabel = new JLabel("Level:");
+        setPosition(galacticCrackerLabel, 325,5);
+        GALACTIC_CRACKER_PANEL.add(galacticCrackerLabel);
+        galacticCrackerLabel = new JLabel("(THX Crafterdark)");
+        setPosition(galacticCrackerLabel, 440, 490);
+        GALACTIC_CRACKER_PANEL.add(galacticCrackerLabel);
 
-        JLabel crackerResultMessage = new JLabel("(you can manually set a seed here if you're cool)");
-        crackerResultMessage.setBounds(25, 130, 400, crackerResultMessage.getPreferredSize().height);
-        crackerPanel.add(crackerResultMessage);
+        JLabel galacticCrackerResultMessage = new JLabel("(you can manually set a seed here if you're cool)");
+        galacticCrackerResultMessage.setBounds(25, 130, 400, galacticCrackerResultMessage.getPreferredSize().height);
+        GALACTIC_CRACKER_PANEL.add(galacticCrackerResultMessage);
 
-        JTextField crackerResult = new JTextField(20);
-        crackerResult.addActionListener((event) -> {
-            if (crackerResult.isEditable()) {
-                rngSeed = Long.parseLong(crackerResult.getText());
-                crackerResultMessage.setText("Manually set seed!");
-                System.out.println("manually set seed to " + rngSeed);
+        JTextField galacticCrackerResult = new JTextField(20);
+        galacticCrackerResult.addActionListener((event) -> {
+            if (galacticCrackerResult.isEditable()) {
+                RNG_SEED = Long.parseLong(galacticCrackerResult.getText());
+                galacticCrackerResultMessage.setText("Manually set seed!");
+                System.out.println("manually set seed to " + RNG_SEED);
             }
         });
-        setPosition(crackerResult, 25, 155);
-        crackerPanel.add(crackerResult);
+        setPosition(galacticCrackerResult, 25, 155);
+        GALACTIC_CRACKER_PANEL.add(galacticCrackerResult);
 
         JButton crackButton = new JButton("Crack RNG");
 
         crackButton.addActionListener((event) -> {
-
-            if (threadTask == null) {
-                crackerResultMessage.setText("Calculating...");
+            if (THREAD_TASK == null) {
+                galacticCrackerResultMessage.setText("Calculating...");
                 crackButton.setEnabled(false);
                 int[][] wordToInt = new int[3][4];
                 int[] levelsToInt = new int[3];
@@ -366,9 +330,9 @@ public class Main {
                 }
 
 
-                Cracker cracker = new Cracker(wordToInt, levelsToInt, bookshelves, version);
-                threadTask = threadPool.submit(cracker);
-                while (!threadTask.isDone()) {
+                GalacticCracker galacticCracker = new GalacticCracker(wordToInt, levelsToInt, BOOKSHELVES, VERSION);
+                THREAD_TASK = threadPool.submit(galacticCracker);
+                while (!THREAD_TASK.isDone()) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -376,26 +340,26 @@ public class Main {
                     }
                 }
                 try {
-                    threadTask.get();
+                    THREAD_TASK.get();
 
-                    if (cracker.getFailed()) {
+                    if (galacticCracker.getFailed()) {
                         throw new InterruptedException("Cracker Failed - No Valid Seeds Found");
                     }
                     else {
-                        crackerResultMessage.setText("Cracked RNG!");
+                        galacticCrackerResultMessage.setText("Cracked RNG!");
 
-                        rngSeed = cracker.getResult();
+                        RNG_SEED = galacticCracker.getResult();
 
-                        crackerResult.setText(String.valueOf(rngSeed));
+                        galacticCrackerResult.setText(String.valueOf(RNG_SEED));
 
                     }
-                    threadTask = null;
+                    THREAD_TASK = null;
                 }
                 catch (ExecutionException | InterruptedException e) {
-                    threadTask = null;
+                    THREAD_TASK = null;
                     System.out.println("Error cracking RNG!");
                     e.printStackTrace();
-                    crackerResultMessage.setText("Error cracking RNG!");
+                    galacticCrackerResultMessage.setText("Error cracking RNG!");
                 }
                 crackButton.setEnabled(true);
                 for (int slot = 0; slot < 3; slot++) {
@@ -410,13 +374,13 @@ public class Main {
 
             }
             else {
-                crackerResultMessage.setText("Error! Already cracking RNG!");
+                galacticCrackerResultMessage.setText("Error! Already cracking RNG!");
             }
 
         });
         crackButton.setEnabled(false);
         setPosition(crackButton, 20, 100);
-        crackerPanel.add(crackButton);
+        GALACTIC_CRACKER_PANEL.add(crackButton);
 
         for (int y = 0; y < 3; y++) {
             JCheckBox check = new JCheckBox();
@@ -442,14 +406,14 @@ public class Main {
                 crackButton.setEnabled(valid);
             });
             fourWordCheck[y] = check;
-            crackerPanel.add(check);
+            GALACTIC_CRACKER_PANEL.add(check);
 
             for (int x = 0; x < 5; x++) {
                 JTextField word = new JTextField(3);
                 word.setTransferHandler(null);
                 int maxNumber;
                 if (x == 4) {
-                    maxNumber = maxLevels;
+                    maxNumber = VERSION.getMaxLevels();
                 }
                 else {
                     maxNumber = 54;
@@ -471,7 +435,8 @@ public class Main {
                                 valid = false;
                             }
                             for (int wordC = 0; wordC < 4; wordC++) {
-                                if (slotWords[slot][wordC].getText().length() == 0 && slotWords[slot][wordC].isEditable()) {
+                                String s = slotWords[slot][wordC].getText();
+                                if ((s == null || s.length() == 0) && slotWords[slot][wordC].isEditable()) {
                                     valid = false;
                                 }
                             }
@@ -480,7 +445,7 @@ public class Main {
                     }
                 });
                 word.setBounds(85 + (x*60), 25+(y*20), word.getPreferredSize().width, word.getPreferredSize().height);
-                crackerPanel.add(word);
+                GALACTIC_CRACKER_PANEL.add(word);
                 if (x == 3) {
                     word.setEditable(false);
                 }
@@ -493,9 +458,9 @@ public class Main {
             }
         }
 
-        JButton crackerClearButton = new JButton("Clear Data");
-        setPosition(crackerClearButton, 125, 100);
-        crackerClearButton.addActionListener((event) -> {
+        JButton galacticCrackerClearButton = new JButton("Clear Data");
+        setPosition(galacticCrackerClearButton, 125, 100);
+        galacticCrackerClearButton.addActionListener((event) -> {
             for (JCheckBox box : fourWordCheck) {
                 box.setSelected(false);
             }
@@ -511,117 +476,532 @@ public class Main {
                 field.setText("");
             }
             crackButton.setEnabled(false);
-            crackerResultMessage.setText("Reset!");
-            rngSeed = -1;
+            galacticCrackerResultMessage.setText("Reset!");
+            RNG_SEED = -1;
         });
-        crackerPanel.add(crackerClearButton);
+        GALACTIC_CRACKER_PANEL.add(galacticCrackerClearButton);
     }
 
-    private static void createManipulatorMenu() {
-        item = version.getItems()[0];
-        material = version.getMaterials()[0];
+    private static void createExtremesCrackerPanel() {
+        EXTREMES_CRACKER_PANEL.removeAll();
+        EXTREMES_CRACKER_PANEL.setName("Extremes Cracker Panel");
+        EXTREMES_CRACKER_PANEL.setLayout(null);
+        EXTREMES_CRACKER_PANEL.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        manipulatorPanel.setLayout(null);
-        manipulatorPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JLabel label;
+        label = new JLabel("Is low?");
+        setPosition(label, 10,5);
+        EXTREMES_CRACKER_PANEL.add(label);
+        label = new JLabel("Advances:");
+        setPosition(label, 80,5);
+        EXTREMES_CRACKER_PANEL.add(label);
+        label = new JLabel("Search Delay (ms)");
+        setPosition(label, 150,5);
+        EXTREMES_CRACKER_PANEL.add(label);
+        label = new JLabel("Auto Search Type");
+        setPosition(label, 150,45);
+        EXTREMES_CRACKER_PANEL.add(label);
+        label = new JLabel("Robot X");
+        setPosition(label, 275,5);
+        EXTREMES_CRACKER_PANEL.add(label);
+        label = new JLabel("Robot Y");
+        setPosition(label, 350,5);
+        EXTREMES_CRACKER_PANEL.add(label);
+        label = new JLabel("PRSC Attempts");
+        setPosition(label, 410,5);
+        EXTREMES_CRACKER_PANEL.add(label);
+
+        JTextField autoSearchDelayTextField = new JTextField(5);
+        autoSearchDelayTextField.setTransferHandler(null);
+        autoSearchDelayTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() < 48 || e.getKeyChar() > 57) {
+                    e.consume();
+                }
+            }
+        });
+        autoSearchDelayTextField.setText("200");
+        autoSearchDelayTextField.setBounds(165, 25, autoSearchDelayTextField.getPreferredSize().width, autoSearchDelayTextField.getPreferredSize().height);
+        EXTREMES_CRACKER_PANEL.add(autoSearchDelayTextField);
+
+        JTextField autoSearchXTextField = new JTextField(5);
+        autoSearchXTextField.setTransferHandler(null);
+        autoSearchXTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() < 48 || e.getKeyChar() > 57) {
+                    e.consume();
+                }
+            }
+        });
+        autoSearchXTextField.setText("0");
+        autoSearchXTextField.setBounds(270, 25, autoSearchXTextField.getPreferredSize().width, autoSearchXTextField.getPreferredSize().height);
+        EXTREMES_CRACKER_PANEL.add(autoSearchXTextField);
+
+        JTextField autoSearchYTextField = new JTextField(5);
+        autoSearchYTextField.setTransferHandler(null);
+        autoSearchYTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() < 48 || e.getKeyChar() > 57) {
+                    e.consume();
+                }
+            }
+        });
+        autoSearchYTextField.setText("0");
+        autoSearchYTextField.setBounds(345, 25, autoSearchYTextField.getPreferredSize().width, autoSearchYTextField.getPreferredSize().height);
+        EXTREMES_CRACKER_PANEL.add(autoSearchYTextField);
+
+        JTextField autoSearchScreenshotsTextField = new JTextField(5);
+        autoSearchScreenshotsTextField.setTransferHandler(null);
+        autoSearchScreenshotsTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() < 48 || e.getKeyChar() > 57) {
+                    e.consume();
+                }
+            }
+        });
+        autoSearchScreenshotsTextField.setText("50");
+        autoSearchScreenshotsTextField.setBounds(425, 25, autoSearchScreenshotsTextField.getPreferredSize().width, autoSearchScreenshotsTextField.getPreferredSize().height);
+        EXTREMES_CRACKER_PANEL.add(autoSearchScreenshotsTextField);
+
+
+        JLabel resultMessage = new JLabel("(you can manually set a seed here if you're cool)");
+        resultMessage.setBounds(25, 80+(VERSION.getExtremesNeeded()*20), 600, resultMessage.getPreferredSize().height);
+        EXTREMES_CRACKER_PANEL.add(resultMessage);
+
+        JTextField crackerResult = new JTextField(20);
+        crackerResult.addActionListener((event) -> {
+            if (crackerResult.isEditable()) {
+                RNG_SEED = Long.parseLong(crackerResult.getText());
+                resultMessage.setText("Manually set seed!");
+                System.out.println("manually set seed to " + RNG_SEED);
+            }
+        });
+        setPosition(crackerResult, 25, 105+(VERSION.getExtremesNeeded()*20));
+        EXTREMES_CRACKER_PANEL.add(crackerResult);
+
+        JCheckBox[] isLowCheckBoxes = new JCheckBox[VERSION.getExtremesNeeded()];
+        JTextField[] advancesTextFields = new JTextField[VERSION.getExtremesNeeded()];
+
+        JButton crackButton = new JButton("Crack RNG");
+
+        crackButton.addActionListener((event) -> {
+            if (THREAD_TASK == null) {
+                resultMessage.setText("Calculating...");
+                crackButton.setEnabled(false);
+                int[] advances = new int[VERSION.getExtremesNeeded()];
+                boolean[] isLow = new boolean[VERSION.getExtremesNeeded()];
+
+                for (int slot = 0; slot < VERSION.getExtremesNeeded(); slot++) {
+                    isLowCheckBoxes[slot].setEnabled(false);
+                    advancesTextFields[slot].setEditable(false);
+                    advances[slot] = Integer.parseInt(advancesTextFields[slot].getText());
+                    isLow[slot] = isLowCheckBoxes[slot].isSelected();
+                }
+
+                ExtremesCracker cracker = new ExtremesCracker(advances, isLow, VERSION);
+                THREAD_TASK = threadPool.submit(cracker);
+                while (!THREAD_TASK.isDone()) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                try {
+                    THREAD_TASK.get();
+
+                    if (cracker.getFailed()) {
+                        throw new InterruptedException("Cracker Failed - No Valid Seeds Found");
+                    }
+                    else {
+                        resultMessage.setText("Cracked RNG!");
+
+                        RNG_SEED = cracker.getResult();
+
+                        crackerResult.setText(String.valueOf(RNG_SEED));
+
+                    }
+                    THREAD_TASK = null;
+                }
+                catch (ExecutionException | InterruptedException e) {
+                    THREAD_TASK = null;
+                    System.out.println("Error cracking RNG!");
+                    e.printStackTrace();
+                    resultMessage.setText("Error cracking RNG!");
+                }
+                crackButton.setEnabled(true);
+                for (int slot = 0; slot < VERSION.getExtremesNeeded(); slot++) {
+                    if (slot != 0) {
+                        advancesTextFields[slot].setEditable(true);
+                    }
+                    isLowCheckBoxes[slot].setEnabled(true);
+
+                }
+
+            }
+            else {
+                resultMessage.setText("Error! Already cracking RNG!");
+            }
+
+        });
+        crackButton.setEnabled(false);
+        setPosition(crackButton, 20, 50+(VERSION.getExtremesNeeded()*20));
+        EXTREMES_CRACKER_PANEL.add(crackButton);
+
+        for (int y = 0; y < VERSION.getExtremesNeeded(); y++) {
+            JTextField word = new JTextField(5);
+            word.setTransferHandler(null);
+
+            word.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    if (e.getKeyChar() < 48 || e.getKeyChar() > 57) {
+                        e.consume();
+                    }
+                }
+
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    boolean valid = true;
+                    for (int slot = 0; slot < VERSION.getExtremesNeeded(); slot++) {
+                        String s = advancesTextFields[slot].getText();
+                        if (s == null || s.length() == 0) {
+                            valid = false;
+                            break;
+                        }
+                    }
+                    crackButton.setEnabled(valid);
+                }
+            });
+
+            if (y == 0) {
+                word.setText("0");
+                word.setEditable(false);
+            }
+
+            word.setBounds(85, 25+(y*20), word.getPreferredSize().width, word.getPreferredSize().height);
+            advancesTextFields[y] = word;
+            EXTREMES_CRACKER_PANEL.add(word);
+
+            JCheckBox check = new JCheckBox();
+            check.setBounds(25,25+(y*20),check.getPreferredSize().width, check.getPreferredSize().height);
+            isLowCheckBoxes[y] = check;
+            EXTREMES_CRACKER_PANEL.add(check);
+        }
+
+        JButton clearButton = new JButton("Clear Data");
+        setPosition(clearButton, 125, 50+(VERSION.getExtremesNeeded()*20));
+        clearButton.addActionListener((event) -> {
+            for (JCheckBox box : isLowCheckBoxes) {
+                box.setSelected(false);
+            }
+            for (int i = 1; i < advancesTextFields.length; i++) {
+                advancesTextFields[i].setText("");
+            }
+            crackButton.setEnabled(false);
+            resultMessage.setText("Reset!");
+            RNG_SEED = -1;
+        });
+        EXTREMES_CRACKER_PANEL.add(clearButton);
+
+        String[] autoSearchTypes = new String[]{"ALT+PRINTSCREEN", "Robot"};
+
+        JComboBox<String> autoSearchType = new JComboBox<>(autoSearchTypes);
+        setPosition(autoSearchType, 150,67);
+        EXTREMES_CRACKER_PANEL.add(autoSearchType);
+
+        JButton enableSearcherButton = new JButton("Enable Auto Searcher");
+        setPosition(enableSearcherButton, 230, 50+(VERSION.getExtremesNeeded()*20));
+        enableSearcherButton.addActionListener((event) -> {
+            try {
+                String s = autoSearchDelayTextField.getText();
+                if (s == null || s.length() == 0) {
+                    resultMessage.setText("Error: Set a valid delay!");
+                    return;
+                }
+                int delay = Integer.parseInt(s);
+                s = autoSearchXTextField.getText();
+                if (s == null || s.length() == 0) {
+                    resultMessage.setText("Error: Set a valid x pos!");
+                    return;
+                }
+                int x = Integer.parseInt(s);
+                s = autoSearchYTextField.getText();
+                if (s == null || s.length() == 0) {
+                    resultMessage.setText("Error: Set a valid y pos!");
+                    return;
+                }
+                int y = Integer.parseInt(s);
+                s = autoSearchScreenshotsTextField.getText();
+                if (s == null || s.length() == 0) {
+                    resultMessage.setText("Error: Set a valid y pos!");
+                    return;
+                }
+                int screenshots = Integer.parseInt(s);
+
+                resultMessage.setText("Set MC window to default size and GUI size 2, place & hover over item in table slot");
+                crackerResult.setText("CTRL start, P pause, SPACE force stop");
+
+                boolean windows = autoSearchType.getSelectedItem().equals(autoSearchTypes[0]);
+
+                new AutoExtremeSearcher(VERSION, delay, x, y, windows, screenshots, advancesTextFields, isLowCheckBoxes, crackButton, resultMessage);
+            }
+            catch (NumberFormatException e) {
+                resultMessage.setText("Error: failed to parse integer option!");
+                return;
+            }
+        });
+        EXTREMES_CRACKER_PANEL.add(enableSearcherButton);
+    }
+
+    private static void createLevelCrackerPanel() {
+        LEVEL_CRACKER_PANEL.removeAll();
+        LEVEL_CRACKER_PANEL.setName("Level Cracker Panel");
+        LEVEL_CRACKER_PANEL.setLayout(null);
+        LEVEL_CRACKER_PANEL.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel levelCrackerLabel;
+        levelCrackerLabel = new JLabel("Levels");
+        setPosition(levelCrackerLabel, 10,5);
+        LEVEL_CRACKER_PANEL.add(levelCrackerLabel);
+        levelCrackerLabel = new JLabel("Slot 1:");
+        setPosition(levelCrackerLabel, 75,5);
+        LEVEL_CRACKER_PANEL.add(levelCrackerLabel);
+        levelCrackerLabel = new JLabel("Slot 2:");
+        setPosition(levelCrackerLabel, 135,5);
+        LEVEL_CRACKER_PANEL.add(levelCrackerLabel);
+        levelCrackerLabel = new JLabel("Slot 3:");
+        setPosition(levelCrackerLabel, 195,5);
+        LEVEL_CRACKER_PANEL.add(levelCrackerLabel);
+
+        JLabel levelCrackerResultMessage = new JLabel("(you can manually set a seed here if you're cool)");
+        levelCrackerResultMessage.setBounds(25, 275, 400, levelCrackerResultMessage.getPreferredSize().height);
+        LEVEL_CRACKER_PANEL.add(levelCrackerResultMessage);
+
+        JTextField levelCrackerResult = new JTextField(20);
+        levelCrackerResult.addActionListener((event) -> {
+            if (levelCrackerResult.isEditable()) {
+                RNG_SEED = Long.parseLong(levelCrackerResult.getText());
+                levelCrackerResultMessage.setText("Manually set seed!");
+                System.out.println("manually set seed to " + RNG_SEED);
+            }
+        });
+        setPosition(levelCrackerResult, 25, 300);
+        LEVEL_CRACKER_PANEL.add(levelCrackerResult);
+
+        JTextField[][] cycleLevels = new JTextField[10][3];
+
+        JButton levelCrackButton = new JButton("Crack RNG");
+        levelCrackButton.setEnabled(false);
+        levelCrackButton.addActionListener((event) -> {
+            if (THREAD_TASK == null) {
+                levelCrackerResultMessage.setText("Calculating...");
+                levelCrackButton.setEnabled(false);
+                int[][] levelData = new int[10][3];
+                for (int cycle = 0; cycle < 10; cycle++) {
+                    for (int slot = 0; slot < 3; slot++) {
+                        levelData[cycle][slot] = Integer.parseInt(cycleLevels[cycle][slot].getText());
+                        cycleLevels[cycle][slot].setEditable(false);
+                    }
+                }
+
+                LevelCracker levelCracker = new LevelCracker(levelData, VERSION);
+                THREAD_TASK = threadPool.submit(levelCracker);
+                while (!THREAD_TASK.isDone()) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                try {
+                    THREAD_TASK.get();
+
+                    if (levelCracker.getFailed()) {
+                        throw new InterruptedException("Cracker Failed - No Valid Seeds Found");
+                    }
+                    else {
+                        levelCrackerResultMessage.setText("Cracked RNG!");
+
+                        RNG_SEED = levelCracker.getResult();
+
+                        levelCrackerResult.setText(String.valueOf(RNG_SEED));
+
+                    }
+                    THREAD_TASK = null;
+                }
+                catch (ExecutionException | InterruptedException e) {
+                    THREAD_TASK = null;
+                    System.out.println("Error cracking RNG!");
+                    e.printStackTrace();
+                    levelCrackerResultMessage.setText("Error cracking RNG!");
+                }
+                levelCrackButton.setEnabled(true);
+                for (int cycle = 0; cycle < 10; cycle++) {
+                    for (int slot = 0; slot < 3; slot++) {
+                        cycleLevels[cycle][slot].setEditable(true);
+                    }
+                }
+
+            }
+            else {
+                levelCrackerResultMessage.setText("Error! Already cracking RNG!");
+            }
+        });
+        setPosition(levelCrackButton, 25, 240);
+        LEVEL_CRACKER_PANEL.add(levelCrackButton);
+
+        for (int cycle = 0; cycle < 10; cycle++) {
+            levelCrackerLabel = new JLabel("Cycle "+(cycle+1)+":");
+            setPosition(levelCrackerLabel, 10, 25+(cycle*20));
+            LEVEL_CRACKER_PANEL.add(levelCrackerLabel);
+
+            for (int slot = 0; slot < 3; slot++) {
+                JTextField word = new JTextField(3);
+                word.setTransferHandler(null);
+
+                word.addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
+                        if (e.getKeyChar() < 48 || e.getKeyChar() > 57 || Integer.parseInt(word.getText()+e.getKeyChar()) > 8) {
+                            e.consume();
+                        }
+                    }
+
+                    @Override
+                    public void keyReleased(KeyEvent e) {
+                        boolean valid = true;
+                        for (int cycle = 0; cycle < 10; cycle++) {
+                            for (int slot = 0; slot < 3; slot++) {
+                                String s = cycleLevels[cycle][slot].getText();
+                                if (s == null || s.length() == 0) {
+                                    valid = false;
+                                    break;
+                                }
+                            }
+                            if (!valid) {
+                                break;
+                            }
+                        }
+                        levelCrackButton.setEnabled(valid);
+                    }
+                });
+                setPosition(word, 75 + (slot*60), 25+(cycle*20));
+                LEVEL_CRACKER_PANEL.add(word);
+                cycleLevels[cycle][slot] = word;
+            }
+        }
+
+        JButton levelCrackerClearButton = new JButton("Clear Data");
+        setPosition(levelCrackerClearButton, 150, 240);
+        levelCrackerClearButton.addActionListener((event) -> {
+            for (int cycle = 0; cycle < 10; cycle++) {
+                for (int slot = 0; slot < 3; slot++) {
+                    cycleLevels[cycle][slot].setText("");
+                }
+            }
+            levelCrackButton.setEnabled(false);
+        });
+        LEVEL_CRACKER_PANEL.add(levelCrackerClearButton);
+    }
+
+    private static void createManipulatorPanel() {
+        MANIPULATOR_PANEL.removeAll();
+        MANIPULATOR_PANEL.setName("Manipulator Panel");
+        MANIPULATOR_PANEL.setLayout(null);
+        MANIPULATOR_PANEL.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JLabel manipulatorLabel;
         manipulatorLabel = new JLabel("Item:");
         setPosition(manipulatorLabel, 10,10);
-        manipulatorPanel.add(manipulatorLabel);
-
-        JComboBox<String> manipulatorItemSelector = new JComboBox<>(version.getItems());
-        manipulatorItemSelector.addActionListener((event) -> {
-            Object selection = manipulatorItemSelector.getSelectedItem();
-            for (int i = 0; i < version.getItems().length; i++) {
-                if (Objects.equals(selection, version.getItems()[i])) {
-                    item = version.getItems()[i];
-                    generateManipulatorEnchantmentSelector();
-                    break;
-                }
-            }
-        });
-        setPosition(manipulatorItemSelector, 65,7);
-        manipulatorPanel.add(manipulatorItemSelector);
+        MANIPULATOR_PANEL.add(manipulatorLabel);
 
         manipulatorLabel = new JLabel("Material:");
         setPosition(manipulatorLabel, 10,40);
-        manipulatorPanel.add(manipulatorLabel);
+        MANIPULATOR_PANEL.add(manipulatorLabel);
 
-        JComboBox<String> manipulatorMaterialSelector = new JComboBox<>(version.getMaterials());
-        manipulatorMaterialSelector.addActionListener((event) -> {
-            Object selection = manipulatorMaterialSelector.getSelectedItem();
-            for (int i = 0; i < version.getMaterials().length; i++) {
-                if (Objects.equals(selection, version.getMaterials()[i])) {
-                    material = version.getMaterials()[i];
-                    generateManipulatorEnchantmentSelector();
-                    break;
-                }
-            }
-        });
+        JComboBox<String> manipulatorMaterialSelector = new JComboBox<>(VERSION.getMaterialStrings(VERSION.getItemStrings()[0]));
         setPosition(manipulatorMaterialSelector, 65,37);
-        manipulatorPanel.add(manipulatorMaterialSelector);
+        MANIPULATOR_PANEL.add(manipulatorMaterialSelector);
+
+        JComboBox<String> manipulatorItemSelector = new JComboBox<>(VERSION.getItemStrings());
+        manipulatorItemSelector.addActionListener((event) -> {
+            String item = (String)manipulatorItemSelector.getSelectedItem();
+            manipulatorMaterialSelector.removeAllItems();
+            for (String s : VERSION.getMaterialStrings(item)) {
+                manipulatorMaterialSelector.addItem(s);
+            }
+
+            generateManipulatorEnchantmentSelector(item);
+        });
+        setPosition(manipulatorItemSelector, 65,7);
+        MANIPULATOR_PANEL.add(manipulatorItemSelector);
 
         manipulatorLabel = new JLabel("Exactly:");
         setPosition(manipulatorLabel, 10,70);
-        manipulatorPanel.add(manipulatorLabel);
+        MANIPULATOR_PANEL.add(manipulatorLabel);
 
         JCheckBox manipulatorExactly = new JCheckBox();
         setPosition(manipulatorExactly, 63, 67);
-        manipulatorPanel.add(manipulatorExactly);
+        MANIPULATOR_PANEL.add(manipulatorExactly);
 
         manipulatorLabel = new JLabel("Advanced Advances:");
         setPosition(manipulatorLabel, 90,70);
-        manipulatorPanel.add(manipulatorLabel);
+        MANIPULATOR_PANEL.add(manipulatorLabel);
 
         JCheckBox manipulatorConsiderAllCalls = new JCheckBox();
         setPosition(manipulatorConsiderAllCalls, 210, 67);
-        manipulatorPanel.add(manipulatorConsiderAllCalls);
+        MANIPULATOR_PANEL.add(manipulatorConsiderAllCalls);
 
         manipulatorConsiderAllCalls.addActionListener((event) -> {
-            advancedAdvances = manipulatorConsiderAllCalls.isSelected();
+            ADVANCED_ADVANCES = manipulatorConsiderAllCalls.isSelected();
         });
 
         manipulatorLabel = new JLabel("Max Advances:");
         setPosition(manipulatorLabel, 10,100);
-        manipulatorPanel.add(manipulatorLabel);
+        MANIPULATOR_PANEL.add(manipulatorLabel);
 
         JTextField setupMaxAdvancesField = new JTextField(5);
-        setupMaxAdvancesField.setText(String.valueOf(maxAdvances));
+        setupMaxAdvancesField.setText(String.valueOf(MAX_ADVANCES));
         setPosition(setupMaxAdvancesField, 100, 99);
-        manipulatorPanel.add(setupMaxAdvancesField);
+        MANIPULATOR_PANEL.add(setupMaxAdvancesField);
 
         JLabel manipulatorResultMessage = new JLabel("Doing nothing...");
         manipulatorResultMessage.setBounds(10, 200, 600, manipulatorResultMessage.getPreferredSize().height);
-        manipulatorPanel.add(manipulatorResultMessage);
+        MANIPULATOR_PANEL.add(manipulatorResultMessage);
 
         JButton manipulatorFinalizeEnchantButton = new JButton("Enchantment Done!");
         setPosition(manipulatorFinalizeEnchantButton, 50, 155);
         manipulatorFinalizeEnchantButton.setEnabled(false);
         manipulatorFinalizeEnchantButton.addActionListener((event) -> {
             manipulatorResultMessage.setText("Doing nothing...");
-            System.out.println("Set RNG to post enchant seed "+postRngSeed);
-            rngSeed = postRngSeed;
-            postRngSeed = -1;
+            System.out.println("Set RNG to post enchant seed "+ POST_RNG_SEED);
+            RNG_SEED = POST_RNG_SEED;
+            POST_RNG_SEED = -1;
             manipulatorFinalizeEnchantButton.setEnabled(false);
         });
-        manipulatorPanel.add(manipulatorFinalizeEnchantButton);
+        MANIPULATOR_PANEL.add(manipulatorFinalizeEnchantButton);
 
         JButton manipulatorFindEnchantButton = new JButton("Find Enchants");
         setPosition(manipulatorFindEnchantButton, 60, 130);
-        manipulatorPanel.add(manipulatorFindEnchantButton);
+        MANIPULATOR_PANEL.add(manipulatorFindEnchantButton);
         manipulatorFindEnchantButton.addActionListener((event) -> {
-            if (rngSeed == -1) {
+            if (RNG_SEED == -1) {
                 manipulatorResultMessage.setText("You haven't cracked the RNG seed yet!");
                 return;
             }
 
-            if (threadTask == null) {
+            if (THREAD_TASK == null) {
                 manipulatorResultMessage.setText("Calculating...");
                 manipulatorFindEnchantButton.setEnabled(false);
 
                 HashMap<Integer, EnchantData> desiredEnchants = new HashMap<>();
-                for (EnchantmentList.Enchant enchant : manipulatorEnchantmentSelectorComponents.keySet()) {
-                    JComponent[] components = manipulatorEnchantmentSelectorComponents.get(enchant);
+                for (Enchantment enchant : MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.keySet()) {
+                    JComponent[] components = MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.get(enchant);
                     if (((JCheckBox)components[1]).isSelected()) {
                         int level = Integer.parseInt((String)((JComboBox<String>)components[2]).getSelectedItem());
                         desiredEnchants.put(enchant.getId(), new EnchantData(enchant, level));
@@ -634,9 +1014,9 @@ public class Main {
                 }
                 else {
 
-                    EnchantFinder finder = new EnchantFinder(item, material, rngSeed, version, bookshelves, maxAdvances, desiredEnchants, manipulatorExactly.isSelected(), advancedAdvances);
-                    threadTask = threadPool.submit(finder);
-                    while (!threadTask.isDone()) {
+                    EnchantFinder finder = new EnchantFinder((String)manipulatorItemSelector.getSelectedItem(), (String)manipulatorMaterialSelector.getSelectedItem(), RNG_SEED, VERSION, BOOKSHELVES, MAX_ADVANCES, desiredEnchants, manipulatorExactly.isSelected(), ADVANCED_ADVANCES);
+                    THREAD_TASK = threadPool.submit(finder);
+                    while (!THREAD_TASK.isDone()) {
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
@@ -644,44 +1024,42 @@ public class Main {
                         }
                     }
                     try {
-                        threadTask.get();
+                        THREAD_TASK.get();
 
                         if (finder.getFailed()) {
                             throw new InterruptedException("Finder Failed");
                         } else {
-                            if (advancedAdvances) {
+                            if (ADVANCED_ADVANCES) {
                                 System.out.println(finder.getResultAdvances() + " raw advances required");
                                 int swapDifferent = (finder.getResultAdvances() / 3);
                                 int swap = 0;
                                 int shift = 0;
                                 if (finder.getResultAdvances() == 1) {
-                                    swap+=1;
-                                }
-                                else {
+                                    swap += 1;
+                                } else {
                                     int mod = finder.getResultAdvances() % 3;
                                     if (mod == 1) {
-                                        swapDifferent-=1;
-                                        shift+=2;
-                                    }
-                                    else if (mod == 2) {
-                                        shift+=1;
+                                        swapDifferent -= 1;
+                                        shift += 2;
+                                    } else if (mod == 2) {
+                                        shift += 1;
                                     }
                                 }
                                 int outIn = swapDifferent % 2 == 1 ? 1 : 0;
-                                swapDifferent-=outIn;
+                                swapDifferent -= outIn;
 
-                                manipulatorResultMessage.setText("Found candidate! Swap Different: "+ swapDifferent + ", Shift Remove: " + shift + ", Swap Same: " + swap + ", OutIn: " + outIn + ", Slot: " + (finder.getResultSlot() + 1) + " " + Arrays.toString(finder.getResultLevels()));
+                                manipulatorResultMessage.setText("Swap Different: " + swapDifferent + ", Shift Remove + Insert: " + shift + ", Swap Same: " + swap + ", OutIn: " + outIn + ", Slot: " + (finder.getResultSlot() + 1) + " " + Arrays.toString(finder.getResultLevels()));
                             }
                             else {
-                                manipulatorResultMessage.setText("Found candidate! Advances: " + finder.getResultAdvances() + ", Slot: " + (finder.getResultSlot() + 1) + " " + Arrays.toString(finder.getResultLevels()));
+                                manipulatorResultMessage.setText("Advances: " + finder.getResultAdvances() + ", Slot: " + (finder.getResultSlot() + 1) + " " + Arrays.toString(finder.getResultLevels()));
                             }
-                            postRngSeed = finder.getResultSeed();
+                            POST_RNG_SEED = finder.getResultSeed();
                             manipulatorFinalizeEnchantButton.setEnabled(true);
                         }
-                        threadTask = null;
+                        THREAD_TASK = null;
                     } catch (ExecutionException | InterruptedException e) {
                         if (finder.getResultAdvances() == -9001) {
-                            manipulatorResultMessage.setText("Failed to find enchant in "+maxAdvances+" advances!");
+                            manipulatorResultMessage.setText("Failed to find enchant in "+ MAX_ADVANCES +" advances!");
                         }
                         else {
                             System.out.println("Error searching!");
@@ -689,7 +1067,7 @@ public class Main {
                             manipulatorResultMessage.setText("Error searching!");
                         }
 
-                        threadTask = null;
+                        THREAD_TASK = null;
                     }
                 }
                 manipulatorFindEnchantButton.setEnabled(true);
@@ -726,16 +1104,16 @@ public class Main {
                 String text = setupMaxAdvancesField.getText();
                 if (text.length() == 0) {
                     manipulatorFindEnchantButton.setEnabled(false);
-                    maxAdvances = -1;
+                    MAX_ADVANCES = -1;
                 }
                 else {
                     manipulatorFindEnchantButton.setEnabled(true);
-                    maxAdvances = Integer.parseInt(text);
+                    MAX_ADVANCES = Integer.parseInt(text);
                 }
             }
         });
 
-        generateManipulatorEnchantmentSelector();
+        generateManipulatorEnchantmentSelector((String)manipulatorItemSelector.getSelectedItem());
     }
 
     private static void setPosition(JComponent component, int x, int y) {
@@ -744,22 +1122,15 @@ public class Main {
         component.setBounds(x, y, width, component.getPreferredSize().height);
     }
 
-
-    public static int getMaxAdvances() {
-        return maxAdvances;
-    }
-
-
-
-    private static void generateManipulatorEnchantmentSelector() {
-        for (JComponent[] components : manipulatorEnchantmentSelectorComponents.values()) {
+    private static void generateManipulatorEnchantmentSelector(String itemName) {
+        for (JComponent[] components : MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.values()) {
             for (JComponent component : components) {
-                manipulatorPanel.remove(component);
+                MANIPULATOR_PANEL.remove(component);
             }
         }
-        manipulatorEnchantmentSelectorComponents.clear();
+        MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.clear();
 
-        ItemList.Item item = version.getItem(Main.item);
+        Item item = VERSION.getItem(itemName);
         if (item != null) {
             JLabel label;
             JCheckBox enchantSelect;
@@ -768,15 +1139,15 @@ public class Main {
             int y = 10;
             for (int id : item.getValidEnchants()) {
                 components = new JComponent[3];
-                EnchantmentList.Enchant enchant = version.getEnchant(id);
+                Enchantment enchant = VERSION.getEnchant(id);
                 label = new JLabel(enchant.getName());
                 setPosition(label, 300, y);
                 components[0] = label;
-                manipulatorPanel.add(label);
+                MANIPULATOR_PANEL.add(label);
                 enchantSelect = new JCheckBox();
                 setPosition(enchantSelect, 450, y-2);
                 components[1] = enchantSelect;
-                manipulatorPanel.add(enchantSelect);
+                MANIPULATOR_PANEL.add(enchantSelect);
 
                 String[] levels = new String[0];
                 switch (enchant.getMaxLevel()) {
@@ -798,15 +1169,16 @@ public class Main {
                 }
 
                 levelSelect = new JComboBox<>(levels);
+                levelSelect.setSelectedIndex(levels.length-1);
                 setPosition(levelSelect, 480, y-3);
                 components[2] = levelSelect;
-                manipulatorPanel.add(levelSelect);
+                MANIPULATOR_PANEL.add(levelSelect);
                 y+= 30;
 
-                manipulatorEnchantmentSelectorComponents.put(enchant, components);
+                MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.put(enchant, components);
             }
-            manipulatorPanel.revalidate();
-            manipulatorPanel.repaint();
+            MANIPULATOR_PANEL.revalidate();
+            MANIPULATOR_PANEL.repaint();
         }
     }
 }

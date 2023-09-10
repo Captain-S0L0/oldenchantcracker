@@ -17,7 +17,8 @@ repositories {
 }
 
 dependencies {
-     implementation 'com.seedfinding:latticg:1.06@jar'
+    implementation 'com.seedfinding:latticg:1.06@jar'
+    implementation 'com.github.kwhat:jnativehook:2.2.2'
 }
 
 sourceSets {
