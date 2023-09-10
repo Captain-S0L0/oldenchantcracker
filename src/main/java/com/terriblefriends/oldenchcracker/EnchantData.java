@@ -1,11 +1,13 @@
 package com.terriblefriends.oldenchcracker;
 
+import com.terriblefriends.oldenchcracker.thingmanagers.Enchantment;
+
 public class EnchantData {
 
     private int level;
-    private EnchantmentList.Enchant enchant;
+    private Enchantment enchant;
 
-    public EnchantData(EnchantmentList.Enchant enchant, int level) {
+    public EnchantData(Enchantment enchant, int level) {
         this.enchant = enchant;
         this.level = level;
     }
@@ -14,7 +16,7 @@ public class EnchantData {
         return this.level;
     }
 
-    public EnchantmentList.Enchant getEnchant() {
+    public Enchantment getEnchant() {
         return this.enchant;
     }
 

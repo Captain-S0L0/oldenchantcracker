@@ -8,12 +8,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class Cracker extends Thread {
-    private static final int wordListLength = 55;
-    private static final long randomMultiplier = 0x5DEECE66DL;
-    private static final long randomMultiplierInverse = 0xdfe05bcb1365L;
-    private static final long randomDelta = 0xbL;
-    private static final long randomMask = ((1L << 48)-1);
+public class GalacticCracker extends Thread {
+    private static final int WORD_LIST_LENGTH = 55;
+    private static final long RANDOM_MULTIPLIER = 0x5DEECE66DL;
+    private static final long RANDOM_MULTIPLIER_INVERSE = 0xdfe05bcb1365L;
+    private static final long RANDOM_DELTA = 0xbL;
+    private static final long RANDOM_MASK = ((1L << 48)-1);
     private final int[][] words;
     private final int[] levels;
     private final int books;
@@ -22,7 +22,7 @@ public class Cracker extends Thread {
     private long result = -1;
 
 
-    public Cracker(int[][] words, int[] levels, int books, Version version) {
+    public GalacticCracker(int[][] words, int[] levels, int books, Version version) {
         this.words = words;
         this.levels = levels;
         this.books = books;
@@ -36,14 +36,14 @@ public class Cracker extends Thread {
         for (int slot = 0; slot < 3; slot++) {
             boolean four = words[slot][3] != -1;
             reverser.addNextIntCall(2, four ? 1 : 0, four ? 1 : 0);
-            reverser.addNextIntCall(wordListLength, words[slot][0], words[slot][0]);
-            reverser.addNextIntCall(wordListLength, words[slot][1], words[slot][1]);
-            reverser.addNextIntCall(wordListLength, words[slot][2], words[slot][2]);
+            reverser.addNextIntCall(WORD_LIST_LENGTH, words[slot][0], words[slot][0]);
+            reverser.addNextIntCall(WORD_LIST_LENGTH, words[slot][1], words[slot][1]);
+            reverser.addNextIntCall(WORD_LIST_LENGTH, words[slot][2], words[slot][2]);
             if (four) {
-                reverser.addNextIntCall(wordListLength, words[slot][3], words[slot][3]);
+                reverser.addNextIntCall(WORD_LIST_LENGTH, words[slot][3], words[slot][3]);
             }
         }
-
+        reverser.setVerbose(true);
         long[] seeds = reverser.findAllValidSeeds().toArray();
         if (seeds.length > 1) {
             System.out.println("ERROR! Found more than 1 valid seed!");
@@ -58,7 +58,7 @@ public class Cracker extends Thread {
             return;
         }
 
-        long wordSeed = seeds[0] ^ randomMultiplier;
+        long wordSeed = seeds[0] ^ RANDOM_MULTIPLIER;
 
         List<Long> sixtyFourSeeds = new ArrayList<>();
 
@@ -72,14 +72,14 @@ public class Cracker extends Thread {
             long b = sixtyfourbits & ((1L<<32)-1);
             if((b & 0x80000000) != 0)
                 a++;
-            long q = ((b << 16) - randomDelta - (a << 16)*randomMultiplier) & randomMask;
+            long q = ((b << 16) - RANDOM_DELTA - (a << 16)* RANDOM_MULTIPLIER) & RANDOM_MASK;
             for(long k=0; k<=5; k++) {
-                long rem = (randomMultiplier - (q + (k<<48))) % randomMultiplier;
-                long d = (rem + randomMultiplier)%randomMultiplier;
+                long rem = (RANDOM_MULTIPLIER - (q + (k<<48))) % RANDOM_MULTIPLIER;
+                long d = (rem + RANDOM_MULTIPLIER)% RANDOM_MULTIPLIER;
                 if(d < 65536) {
-                    long c = ((q + d) * randomMultiplierInverse) & randomMask;
+                    long c = ((q + d) * RANDOM_MULTIPLIER_INVERSE) & RANDOM_MASK;
                     if(c < 65536) {
-                        sixtyfourbitsSeed = ((((a << 16) + c) - randomDelta) * randomMultiplierInverse) & randomMask;
+                        sixtyfourbitsSeed = ((((a << 16) + c) - RANDOM_DELTA) * RANDOM_MULTIPLIER_INVERSE) & RANDOM_MASK;
                         failed = false;
                         break;
                     }
@@ -92,7 +92,7 @@ public class Cracker extends Thread {
             //END "BORROWED" CODE
 
             //we don't need the levels to crack the RNG directly, but as 2 64 bit longs could be valid for a 48 bit seed, need this extra check
-            Random sixteenCrack = new Random((sixtyfourbitsSeed^randomMultiplier) & randomMask);
+            Random sixteenCrack = new Random((sixtyfourbitsSeed^ RANDOM_MULTIPLIER) & RANDOM_MASK);
             sixteenCrack.nextLong();
 
             int[] levels = version.getEnchantLevels(sixteenCrack, books);
