@@ -1,18 +1,15 @@
-# Old Minecraft Enchantment Cracker
+# Old Enchantment Cracker
 
-A tool for cracking and manipulating the RNG of enchanting in singleplayer Minecraft for versions between Beta 1.9 Prerelease 4 and 12w17a (1.3 snapshot) to always get the enchantments you want.<br><br>
-This is possible as the Random object that selects the random words displayed in the Standard Galactic Alphabet is seeded by the Random object that is later used by the enchanting container to actually enchant your items.
+A tool for cracking and manipulating the RNG of enchanting in Minecraft for versions between Beta 1.9 Prerelease 4 and 1.7.10 to always get the enchantments you want.<br><br>
+This is possible in a variety of ways, such as:
+* From Beta 1.9 Prerelease 4 to 12w17b, the Random object that selects the random words displayed in the Standard Galactic Alphabet is seeded by the Random object that is later used by the enchanting container to actually enchant your items, at least in singleplayer.
+* From Beta 1.9 Prerelease 4 to 12w21b, one can locate extremities produced by the RNG to obtain enough data out of just the levels themselves. Works in multiplayer, but takes a while, so if galactic is available, use that.
+* From 12w22a to 1.7.10, one can disable the bookshelves powering the table to reduce the level call to a simple 1 + random.nextInt(8), and then use an item dropped from the GUI to trigger a pressure plate and re-enable the bookshelves while staying inside the enchanting GUI, both in singleplayer and multiplayer.
 Plug that data into the wonderful [LattiCG](https://github.com/mjtb49/LattiCG), and presto, you now have the enchanting seed. Combine that with an enchantment predictor, and you have a pretty powerful tool.<br><br>
-**This only works in singleplayer**, as the enchanting container used by the client and the "server" are the same object, thus the Random is the same. This breaks with the move to the internal server,
-as the container object that seeded the enchanting GUI was no longer shared.<br><br>
-A short video explaining how to use this tool can be found [here](https://youtu.be/elcx1i7Zauc).<br><br>
-A new function has been added that allows for obtaining your enchantments in less advances that is NOT covered
-in that tutorial. To enable, tick the "Advanced Advances" box on the manipulation tab. From there, you need to know
-what to do with the results, and they are as follows:
-* "Swap Different" - Swap the item with something else that is enchantable.
-* "Shift Remove" - Shift click the item out of the table, and put it back in again.
-* "Swap Same" - Swap the item with another one of itself that is not enchanted.
-* "OutIn" - Left-click the item out and back into the slot.
+A video explaining how to use this tool can be found [here](https://www.youtube.com/watch?v=AufoTbXW3_0).<br><br>
 
-If you have any issues, make sure you are running both Minecraft and the finder with the same Java version, as changes in Java's HashMap functions can influence the enchanting process.
+If you have any issues make sure to do the following:<br><br>
+* You are running both Minecraft and the finder with the same Java version, as changes in Java's HashMap functions can influence the enchanting process.
+* You are NOT drag-clicking the item inside the GUI slot in 1.5+
+* Use the ROBOT option if the ALT+PRTSRC searcher is being problematic
 If you still have problems, feel free to contact me on Discord @captain_s0l0, or open an issue.
