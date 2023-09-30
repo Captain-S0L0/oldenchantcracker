@@ -30,8 +30,8 @@ public class Main {
     THREE 12w18a - internal server
     FOUR 12w22a (1.3) - 50 -> 30 level change
     FIVE 12w49a (1.4.6) - enchanted books added
-    SIX 12w50a (1.4.6) - chestplates can receive thorns
-    SEVEN 13w36a (1.7) - fishing rods can be enchanted, sword + armor + bows can receive unbreaking
+    SIX 12w50a (1.4.6) - chestplates can receive thorns, shears can receive silk
+    SEVEN 13w36a (1.7) - fishing rods can be enchanted, armor + bows can receive unbreaking
     EIGHT 13w37a (1.7) - changes to how enchantments are selected for books
     14w02a (1.8) - end of this tool
      */
