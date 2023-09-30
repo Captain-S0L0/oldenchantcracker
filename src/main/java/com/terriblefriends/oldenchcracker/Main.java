@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class Main {
-    private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
+    private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(1);
 
     /*
     ZERO b1.9pre4 - fortune + silk
@@ -93,7 +93,7 @@ public class Main {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
-                    Desktop.getDesktop().browse(new URI("https://youtu.be/AufoTbXW3_0"));
+                    Desktop.getDesktop().browse(new URI("https://youtu.be/TvSVEXHQ4FA"));
 
                 } catch (IOException | URISyntaxException e1) {
                     e1.printStackTrace();
@@ -135,9 +135,6 @@ public class Main {
         SETUP_PANEL.add(setupLabel);
 
         JTextField setupBookSelector = new JTextField(3);
-        setupBookSelector.setText(String.valueOf(BOOKSHELVES));
-        setPosition(setupBookSelector, 70, 39);
-        SETUP_PANEL.add(setupBookSelector);
 
         JButton setupFinalizeButton = new JButton("Start!");
         setPosition(setupFinalizeButton, 30, 75);
@@ -226,30 +223,50 @@ public class Main {
             TABS.addTab("Manipulator", MANIPULATOR_PANEL);
         });
 
+        setupBookSelector.setText(String.valueOf(BOOKSHELVES));
         setupBookSelector.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if (e.getKeyChar() < 48 || e.getKeyChar() > 57 || Integer.parseInt(setupBookSelector.getText()+e.getKeyChar()) > VERSION.getMaxBookShelves()) {
+                int i;
+                String s = setupBookSelector.getText();
+                if (s == null) {
+                    s = "";
+                }
+                s+=e.getKeyChar();
+                try {
+                    i = Integer.parseInt(s);
+                }
+                catch (NumberFormatException nfe) {
+                    e.consume();
+                    return;
+                }
+                if (e.getKeyChar() < 48 || e.getKeyChar() > 57 || i > VERSION.getMaxBookShelves()) {
                     e.consume();
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                if (!setupBookSelector.isEditable()) {
-                    return;
-                }
                 String text = setupBookSelector.getText();
-                if (text.length() == 0) {
+                if (text == null || text.length() == 0) {
                     setupFinalizeButton.setEnabled(false);
                     BOOKSHELVES = -1;
                 }
                 else {
-                    setupFinalizeButton.setEnabled(true);
-                    BOOKSHELVES = Integer.parseInt(text);
+                    try {
+                        BOOKSHELVES = Integer.parseInt(text);
+                        setupFinalizeButton.setEnabled(true);
+                    }
+                    catch (NumberFormatException nfe) {
+                        setupFinalizeButton.setEnabled(false);
+                        e.consume();
+                    }
                 }
             }
         });
+        setupBookSelector.setTransferHandler(null);
+        setPosition(setupBookSelector, 70, 39);
+        SETUP_PANEL.add(setupBookSelector);
     }
 
     private static void createGalacticCrackerPanel() {
@@ -299,9 +316,14 @@ public class Main {
         JTextField galacticCrackerResult = new JTextField(20);
         galacticCrackerResult.addActionListener((event) -> {
             if (galacticCrackerResult.isEditable()) {
-                RNG_SEED = Long.parseLong(galacticCrackerResult.getText());
-                galacticCrackerResultMessage.setText("Manually set seed!");
-                System.out.println("manually set seed to " + RNG_SEED);
+                try {
+                    RNG_SEED = Long.parseLong(galacticCrackerResult.getText());
+                    galacticCrackerResultMessage.setText("Manually set seed!");
+                    System.out.println("manually set seed to " + RNG_SEED);
+                }
+                catch (NumberFormatException nfe) {
+                    galacticCrackerResultMessage.setText("Error! Enter an actual number!");
+                }
             }
         });
         setPosition(galacticCrackerResult, 25, 155);
@@ -331,7 +353,7 @@ public class Main {
 
 
                 GalacticCracker galacticCracker = new GalacticCracker(wordToInt, levelsToInt, BOOKSHELVES, VERSION);
-                THREAD_TASK = threadPool.submit(galacticCracker);
+                THREAD_TASK = THREAD_POOL.submit(galacticCracker);
                 while (!THREAD_TASK.isDone()) {
                     try {
                         Thread.sleep(100);
@@ -422,7 +444,20 @@ public class Main {
                 word.addKeyListener(new KeyAdapter() {
                     @Override
                     public void keyTyped(KeyEvent e) {
-                        if (e.getKeyChar() < 48 || e.getKeyChar() > 57 || Integer.parseInt(word.getText()+e.getKeyChar()) > maxNumber) {
+                        int i;
+                        String s = word.getText();
+                        if (s == null) {
+                            s = "";
+                        }
+                        s+=e.getKeyChar();
+                        try {
+                            i = Integer.parseInt(s);
+                        }
+                        catch (NumberFormatException nfe) {
+                            e.consume();
+                            return;
+                        }
+                        if (e.getKeyChar() < 48 || e.getKeyChar() > 57 || i > maxNumber) {
                             e.consume();
                         }
                     }
@@ -510,12 +545,27 @@ public class Main {
         label = new JLabel("PRSC Attempts");
         setPosition(label, 410,5);
         EXTREMES_CRACKER_PANEL.add(label);
+        label = new JLabel("Test Search");
+        setPosition(label, 300,50);
+        EXTREMES_CRACKER_PANEL.add(label);
 
         JTextField autoSearchDelayTextField = new JTextField(5);
         autoSearchDelayTextField.setTransferHandler(null);
         autoSearchDelayTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
+                String s = autoSearchDelayTextField.getText();
+                if (s == null) {
+                    s = "";
+                }
+                s+=e.getKeyChar();
+                try {
+                    Integer.parseInt(s);
+                }
+                catch (NumberFormatException nfe) {
+                    e.consume();
+                    return;
+                }
                 if (e.getKeyChar() < 48 || e.getKeyChar() > 57) {
                     e.consume();
                 }
@@ -530,6 +580,18 @@ public class Main {
         autoSearchXTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
+                String s = autoSearchDelayTextField.getText();
+                if (s == null) {
+                    s = "";
+                }
+                s+=e.getKeyChar();
+                try {
+                    Integer.parseInt(s);
+                }
+                catch (NumberFormatException nfe) {
+                    e.consume();
+                    return;
+                }
                 if (e.getKeyChar() < 48 || e.getKeyChar() > 57) {
                     e.consume();
                 }
@@ -544,6 +606,18 @@ public class Main {
         autoSearchYTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
+                String s = autoSearchDelayTextField.getText();
+                if (s == null) {
+                    s = "";
+                }
+                s+=e.getKeyChar();
+                try {
+                    Integer.parseInt(s);
+                }
+                catch (NumberFormatException nfe) {
+                    e.consume();
+                    return;
+                }
                 if (e.getKeyChar() < 48 || e.getKeyChar() > 57) {
                     e.consume();
                 }
@@ -558,6 +632,18 @@ public class Main {
         autoSearchScreenshotsTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
+                String s = autoSearchDelayTextField.getText();
+                if (s == null) {
+                    s = "";
+                }
+                s+=e.getKeyChar();
+                try {
+                    Integer.parseInt(s);
+                }
+                catch (NumberFormatException nfe) {
+                    e.consume();
+                    return;
+                }
                 if (e.getKeyChar() < 48 || e.getKeyChar() > 57) {
                     e.consume();
                 }
@@ -567,6 +653,9 @@ public class Main {
         autoSearchScreenshotsTextField.setBounds(425, 25, autoSearchScreenshotsTextField.getPreferredSize().width, autoSearchScreenshotsTextField.getPreferredSize().height);
         EXTREMES_CRACKER_PANEL.add(autoSearchScreenshotsTextField);
 
+        JCheckBox autoSearchTestMode = new JCheckBox();
+        setPosition(autoSearchTestMode, 320, 70);
+        EXTREMES_CRACKER_PANEL.add(autoSearchTestMode);
 
         JLabel resultMessage = new JLabel("(you can manually set a seed here if you're cool)");
         resultMessage.setBounds(25, 80+(VERSION.getExtremesNeeded()*20), 600, resultMessage.getPreferredSize().height);
@@ -575,9 +664,14 @@ public class Main {
         JTextField crackerResult = new JTextField(20);
         crackerResult.addActionListener((event) -> {
             if (crackerResult.isEditable()) {
-                RNG_SEED = Long.parseLong(crackerResult.getText());
-                resultMessage.setText("Manually set seed!");
-                System.out.println("manually set seed to " + RNG_SEED);
+                try {
+                    RNG_SEED = Long.parseLong(crackerResult.getText());
+                    resultMessage.setText("Manually set seed!");
+                    System.out.println("manually set seed to " + RNG_SEED);
+                }
+                catch (NumberFormatException nfe) {
+                    resultMessage.setText("Error! Enter an actual number!");
+                }
             }
         });
         setPosition(crackerResult, 25, 105+(VERSION.getExtremesNeeded()*20));
@@ -603,7 +697,7 @@ public class Main {
                 }
 
                 ExtremesCracker cracker = new ExtremesCracker(advances, isLow, VERSION);
-                THREAD_TASK = threadPool.submit(cracker);
+                THREAD_TASK = THREAD_POOL.submit(cracker);
                 while (!THREAD_TASK.isDone()) {
                     try {
                         Thread.sleep(100);
@@ -659,6 +753,18 @@ public class Main {
             word.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyTyped(KeyEvent e) {
+                    String s = autoSearchDelayTextField.getText();
+                    if (s == null) {
+                        s = "";
+                    }
+                    s+=e.getKeyChar();
+                    try {
+                        Integer.parseInt(s);
+                    }
+                    catch (NumberFormatException nfe) {
+                        e.consume();
+                        return;
+                    }
                     if (e.getKeyChar() < 48 || e.getKeyChar() > 57) {
                         e.consume();
                     }
@@ -744,11 +850,11 @@ public class Main {
                 int screenshots = Integer.parseInt(s);
 
                 resultMessage.setText("Set MC window to default size and GUI size 2, place & hover over item in table slot");
-                crackerResult.setText("CTRL start, P pause, SPACE force stop");
+                crackerResult.setText("F4 start, F8 pause, F12 force stop");
 
                 boolean windows = autoSearchType.getSelectedItem().equals(autoSearchTypes[0]);
 
-                new AutoExtremeSearcher(VERSION, delay, x, y, windows, screenshots, advancesTextFields, isLowCheckBoxes, crackButton, resultMessage);
+                new AutoExtremeSearcher(VERSION, delay, x, y, windows, screenshots, autoSearchTestMode.isSelected(), advancesTextFields, isLowCheckBoxes, crackButton, resultMessage);
             }
             catch (NumberFormatException e) {
                 resultMessage.setText("Error: failed to parse integer option!");
@@ -785,9 +891,14 @@ public class Main {
         JTextField levelCrackerResult = new JTextField(20);
         levelCrackerResult.addActionListener((event) -> {
             if (levelCrackerResult.isEditable()) {
-                RNG_SEED = Long.parseLong(levelCrackerResult.getText());
-                levelCrackerResultMessage.setText("Manually set seed!");
-                System.out.println("manually set seed to " + RNG_SEED);
+                try {
+                    RNG_SEED = Long.parseLong(levelCrackerResult.getText());
+                    levelCrackerResultMessage.setText("Manually set seed!");
+                    System.out.println("manually set seed to " + RNG_SEED);
+                }
+                catch (NumberFormatException nfe) {
+                    levelCrackerResultMessage.setText("Error! Enter an actual number!");
+                }
             }
         });
         setPosition(levelCrackerResult, 25, 300);
@@ -810,7 +921,7 @@ public class Main {
                 }
 
                 LevelCracker levelCracker = new LevelCracker(levelData, VERSION);
-                THREAD_TASK = threadPool.submit(levelCracker);
+                THREAD_TASK = THREAD_POOL.submit(levelCracker);
                 while (!THREAD_TASK.isDone()) {
                     try {
                         Thread.sleep(100);
@@ -867,7 +978,20 @@ public class Main {
                 word.addKeyListener(new KeyAdapter() {
                     @Override
                     public void keyTyped(KeyEvent e) {
-                        if (e.getKeyChar() < 48 || e.getKeyChar() > 57 || Integer.parseInt(word.getText()+e.getKeyChar()) > 8) {
+                        String s = word.getText();
+                        int i;
+                        if (s == null) {
+                            s = "";
+                        }
+                        s+=e.getKeyChar();
+                        try {
+                            i = Integer.parseInt(s);
+                        }
+                        catch (NumberFormatException nfe) {
+                            e.consume();
+                            return;
+                        }
+                        if (e.getKeyChar() < 48 || e.getKeyChar() > 57 || i > 8) {
                             e.consume();
                         }
                     }
@@ -966,9 +1090,6 @@ public class Main {
         MANIPULATOR_PANEL.add(manipulatorLabel);
 
         JTextField setupMaxAdvancesField = new JTextField(5);
-        setupMaxAdvancesField.setText(String.valueOf(MAX_ADVANCES));
-        setPosition(setupMaxAdvancesField, 100, 99);
-        MANIPULATOR_PANEL.add(setupMaxAdvancesField);
 
         JLabel manipulatorResultMessage = new JLabel("Doing nothing...");
         manipulatorResultMessage.setBounds(10, 200, 600, manipulatorResultMessage.getPreferredSize().height);
@@ -1015,7 +1136,7 @@ public class Main {
                 else {
 
                     EnchantFinder finder = new EnchantFinder((String)manipulatorItemSelector.getSelectedItem(), (String)manipulatorMaterialSelector.getSelectedItem(), RNG_SEED, VERSION, BOOKSHELVES, MAX_ADVANCES, desiredEnchants, manipulatorExactly.isSelected(), ADVANCED_ADVANCES);
-                    THREAD_TASK = threadPool.submit(finder);
+                    THREAD_TASK = THREAD_POOL.submit(finder);
                     while (!THREAD_TASK.isDone()) {
                         try {
                             Thread.sleep(100);
@@ -1080,18 +1201,20 @@ public class Main {
         setupMaxAdvancesField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
+                String s = setupMaxAdvancesField.getText();
+                if (s == null) {
+                    s = "";
+                }
+                s+=e.getKeyChar();
+                try {
+                    Integer.parseInt(s);
+                }
+                catch (NumberFormatException nfe) {
+                    e.consume();
+                    return;
+                }
                 if (e.getKeyChar() < 48 || e.getKeyChar() > 57) {
                     e.consume();
-                }
-                else {
-                    try {
-                        if (Integer.parseInt(setupMaxAdvancesField.getText() + e.getKeyChar()) < 0) {
-                            e.consume();
-                        }
-                    }
-                    catch (NumberFormatException exception) {
-                        e.consume();
-                    }
                 }
 
             }
@@ -1112,6 +1235,10 @@ public class Main {
                 }
             }
         });
+        setupMaxAdvancesField.setTransferHandler(null);
+        setupMaxAdvancesField.setText(String.valueOf(MAX_ADVANCES));
+        setPosition(setupMaxAdvancesField, 100, 99);
+        MANIPULATOR_PANEL.add(setupMaxAdvancesField);
 
         generateManipulatorEnchantmentSelector((String)manipulatorItemSelector.getSelectedItem());
     }

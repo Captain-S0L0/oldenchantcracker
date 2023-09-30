@@ -80,11 +80,13 @@ public class AutoExtremeSearcher implements NativeKeyListener {
     private final int y;
     private final JLabel resultMessage;
     private final int screenshotAttempts;
+    private final boolean testMode;
 
     private boolean hasStarted = false;
     private boolean paused = false;
+    private boolean hasFoundAnything = false;
 
-    public AutoExtremeSearcher(Version version, int delay, int x, int y, boolean windowsMode, int screenshotAttempts, JTextField[] advancesTextFields, JCheckBox[] isLowCheckBoxes, JButton crackButton, JLabel resultMessage) {
+    public AutoExtremeSearcher(Version version, int delay, int x, int y, boolean windowsMode, int screenshotAttempts, boolean testMode, JTextField[] advancesTextFields, JCheckBox[] isLowCheckBoxes, JButton crackButton, JLabel resultMessage) {
         this.extremesNeeded = version.getExtremesNeeded();
         this.version = version;
         this.delay = delay;
@@ -96,6 +98,7 @@ public class AutoExtremeSearcher implements NativeKeyListener {
         this.y = y;
         this.resultMessage = resultMessage;
         this.screenshotAttempts = screenshotAttempts;
+        this.testMode = testMode;
 
         GlobalScreen.addNativeKeyListener(this);
     }
@@ -104,7 +107,7 @@ public class AutoExtremeSearcher implements NativeKeyListener {
     public void nativeKeyReleased(NativeKeyEvent keyEvent) {
         //System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(keyEvent.getKeyCode()));
 
-        if (keyEvent.getKeyCode() == NativeKeyEvent.VC_CONTROL) {
+        if (!this.paused && keyEvent.getKeyCode() == NativeKeyEvent.VC_F4) {
             if (!this.hasStarted) {
                 this.hasStarted = true;
                 Thread cycleThread = new Thread(() -> {
@@ -117,13 +120,6 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                                 Thread.sleep(1000);
                                 continue;
                             }
-
-
-                            ROBOT.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-                            Thread.sleep(10);
-                            ROBOT.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-                            ROBOT.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-                            Thread.sleep(this.delay);
 
                             BufferedImage bufferedImage;
                             if (this.windowsMode) {
@@ -179,63 +175,82 @@ public class AutoExtremeSearcher implements NativeKeyListener {
 
                             boolean singleDigit = true;
 
-                            if (!foundAnything) {
-                                this.exit("Error! Failed to find pixels! (either GUI isn't 2 or your X & Y are wrong)");
+                            if (!this.hasFoundAnything && !foundAnything) {
+                                this.exit("Error! Failed to find pixels! (GUI isn't 2, X & Y wrong, or delay too low)");
                                 return;
                             }
-
-                            for (boolean b : digitTwo) {
-                                if (b) {
-                                    singleDigit = false;
-                                    break;
-                                }
+                            else {
+                                this.hasFoundAnything = true;
                             }
 
-                            if (Arrays.equals(digitTwo, FIVE)) {
-                                this.isLowCheckBoxes[collected].setSelected(false);
-                                if (collected != 0) {
-                                    this.advancesTextFields[collected].setText(String.valueOf(cycles));
+                            //if we encounter a blank page (e.g. lag), just wait until the thing loads
+                            if (foundAnything) {
+                                for (boolean b : digitTwo) {
+                                    if (b) {
+                                        singleDigit = false;
+                                        break;
+                                    }
                                 }
-                                System.out.println("high "+cycles);
-                                collected++;
-                                cycles = 0;
-                                if (collected == this.extremesNeeded) {
-                                    this.exit("Auto Searcher complete!");
-                                    this.crackButton.setEnabled(true);
+
+                                if (this.testMode && Arrays.equals(digitOne, FIVE)) {
+                                    this.exit("Auto Searcher test success!");
                                     return;
                                 }
-                            }
-                            else if (singleDigit && this.extremesNeeded == 5 && Arrays.equals(digitOne, ONE)) {
-                                this.isLowCheckBoxes[collected].setSelected(true);
-                                if (collected != 0) {
-                                    this.advancesTextFields[collected].setText(String.valueOf(cycles));
+
+                                if (Arrays.equals(digitTwo, FIVE)) {
+                                    this.isLowCheckBoxes[collected].setSelected(false);
+                                    if (collected != 0) {
+                                        this.advancesTextFields[collected].setText(String.valueOf(cycles));
+                                    }
+                                    System.out.println("high " + cycles);
+                                    collected++;
+                                    cycles = 0;
+                                    if (collected == this.extremesNeeded) {
+                                        this.exit("Auto Searcher complete!");
+                                        this.crackButton.setEnabled(true);
+                                        return;
+                                    }
+                                } else if (singleDigit && this.extremesNeeded == 5 && Arrays.equals(digitOne, ONE)) {
+                                    this.isLowCheckBoxes[collected].setSelected(true);
+                                    if (collected != 0) {
+                                        this.advancesTextFields[collected].setText(String.valueOf(cycles));
+                                    }
+                                    System.out.println("low " + cycles);
+                                    collected++;
+                                    cycles = 0;
+                                    if (collected == this.extremesNeeded) {
+                                        this.exit("Auto Searcher complete!");
+                                        this.crackButton.setEnabled(true);
+                                        return;
+                                    }
+                                } else if (this.extremesNeeded == 11 && Arrays.equals(digitTwo, ONE) && Arrays.equals(digitOne, SIX)) {
+                                    this.isLowCheckBoxes[collected].setSelected(true);
+                                    if (collected != 0) {
+                                        this.advancesTextFields[collected].setText(String.valueOf(cycles));
+                                    }
+                                    System.out.println("low " + cycles);
+                                    collected++;
+                                    cycles = 0;
+                                    if (collected == this.extremesNeeded) {
+                                        this.exit("Auto Searcher complete!");
+                                        this.crackButton.setEnabled(true);
+                                        return;
+                                    }
+                                } else {
+                                    cycles++;
                                 }
-                                System.out.println("low "+cycles);
-                                collected++;
-                                cycles = 0;
-                                if (collected == this.extremesNeeded) {
-                                    this.exit("Auto Searcher complete!");
-                                    this.crackButton.setEnabled(true);
-                                    return;
-                                }
-                            }
-                            else if (this.extremesNeeded == 11 && Arrays.equals(digitTwo, ONE) && Arrays.equals(digitOne, SIX)) {
-                                this.isLowCheckBoxes[collected].setSelected(true);
-                                if (collected != 0) {
-                                    this.advancesTextFields[collected].setText(String.valueOf(cycles));
-                                }
-                                System.out.println("low "+cycles);
-                                collected++;
-                                cycles = 0;
-                                if (collected == this.extremesNeeded) {
-                                    this.exit("Auto Searcher complete!");
-                                    this.crackButton.setEnabled(true);
-                                    return;
-                                }
+
+                                ROBOT.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                                Thread.sleep(10);
+                                ROBOT.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                                ROBOT.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
                             }
                             else {
-                                cycles++;
+                                this.resultMessage.setText("Soft Error, found empty page! (your delay might be too low)");
                             }
+
+                            Thread.sleep(this.delay);
+
                         }
                     } catch (Exception e) {
                         this.exit("Error! Something happened! (check console)");
@@ -245,11 +260,11 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                 cycleThread.start();
             }
         }
-        else if (keyEvent.getKeyCode() == NativeKeyEvent.VC_SPACE) {
+        else if (!this.paused && keyEvent.getKeyCode() == NativeKeyEvent.VC_F12) {
             this.exit("Auto Searcher force stopped!");
         }
-        else if (keyEvent.getKeyCode() == NativeKeyEvent.VC_P) {
-            paused = !paused;
+        else if (keyEvent.getKeyCode() == NativeKeyEvent.VC_F8) {
+            this.paused = !this.paused;
             this.resultMessage.setText("Auto Searcher paused = "+paused);
         }
     }
