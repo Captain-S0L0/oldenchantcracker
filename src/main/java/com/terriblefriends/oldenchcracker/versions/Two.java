@@ -8,7 +8,7 @@ import java.util.*;
 
 public class Two implements Version {
 
-    //Tools for Minecraft versions 1.1 to 12w17b (1.3 snap)
+    //Tools for Minecraft version 12w01a
 
     private static final EnchantmentManager ENCHANTMENT_MANAGER = new EnchantmentManager();
     private static final ItemManager ITEM_MANAGER = new ItemManager();
