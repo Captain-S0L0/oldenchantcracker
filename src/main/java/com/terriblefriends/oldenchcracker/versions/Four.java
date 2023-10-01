@@ -7,30 +7,30 @@ import com.terriblefriends.oldenchcracker.thingmanagers.*;
 import java.util.*;
 
 public class Four implements Version {
-    //Tools for Minecraft versions 12w22a (1.3 snap) to 12w49a (1.4.6)
+    //Tools for Minecraft versions 12w18a (1.3 snap) to 12w21b (1.3 snap)
 
     private static final EnchantmentManager ENCHANTMENT_MANAGER = new EnchantmentManager();
     private static final ItemManager ITEM_MANAGER = new ItemManager();
     private static final MaterialManager MATERIAL_MANAGER = new MaterialManager();
 
     static {
-        ENCHANTMENT_MANAGER.register("Protection", 0, 10, 4, l -> 1 + (l - 1) * 11, l -> (1 + (l - 1) * 11) + 20, new int[]{1, 3, 4});
+        ENCHANTMENT_MANAGER.register("Protection", 0, 10, 4, l -> 1 + (l - 1) * 16, l -> (1 + (l - 1) * 16) + 20, new int[]{1, 3, 4});
         ENCHANTMENT_MANAGER.register("Fire Protection", 1, 5, 4, l -> 10 + (l - 1) * 8, l -> (10 + (l - 1) * 8) + 12, new int[]{0, 3, 4});
         ENCHANTMENT_MANAGER.register("Feather Falling", 2, 5, 4, l -> 5 + (l - 1) * 6, l -> (5 + (l - 1) * 6) + 10, null);
         ENCHANTMENT_MANAGER.register("Blast Protection", 3, 2, 4, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 12, new int[]{0, 1, 4});
         ENCHANTMENT_MANAGER.register("Projectile Protection", 4, 5, 4, l -> 3 + (l - 1) * 6, l -> (3 + (l - 1) * 6) + 15, new int[]{0, 1, 3});
         ENCHANTMENT_MANAGER.register("Respiration", 5, 2, 3, l -> 10 * l, l -> (10 * l) + 30, null);
         ENCHANTMENT_MANAGER.register("Aqua Affinity", 6, 2, 1, l -> 1, l -> 41, null);
-        ENCHANTMENT_MANAGER.register("Sharpness", 16, 10, 5, l -> 1 + (l - 1) * 11, l -> (1 + (l - 1) * 11) + 20, new int[]{17, 18});
+        ENCHANTMENT_MANAGER.register("Sharpness", 16, 10, 5, l -> 1 + (l - 1) * 16, l -> (1 + (l - 1) * 16) + 20, new int[]{17, 18});
         ENCHANTMENT_MANAGER.register("Smite", 17, 5, 5, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 20, new int[]{16, 18});
         ENCHANTMENT_MANAGER.register("Bane of Arthropods", 18, 5, 5, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 20, new int[]{16, 17});
         ENCHANTMENT_MANAGER.register("Knockback", 19, 5, 2, l -> 5 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
         ENCHANTMENT_MANAGER.register("Fire Aspect", 20, 2, 2, l -> 10 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("Looting", 21, 2, 3, l -> 15 + (l - 1) * 9, l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("Efficiency", 32, 10, 5, l -> 1 + 10 * (l - 1), l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("Silk Touch", 33, 1, 1, l -> 15, l -> (1 + l * 10) + 50, new int[]{35});
-        ENCHANTMENT_MANAGER.register("Unbreaking", 34, 5, 3, l -> 5 + (l - 1) * 8, l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("Fortune", 35, 2, 3, l -> 15 + (l - 1) * 9, l -> (1 + l * 10) + 50, new int[]{33});
+        ENCHANTMENT_MANAGER.register("Looting", 21, 2, 3, l -> 20 + (l - 1) * 12, l -> (1 + l * 10) + 50, null);
+        ENCHANTMENT_MANAGER.register("Efficiency", 32, 10, 5, l -> 1 + 15 * (l - 1), l -> (1 + l * 10) + 50, null);
+        ENCHANTMENT_MANAGER.register("Silk Touch", 33, 1, 1, l -> 25, l -> (1 + l * 10) + 50, new int[]{35});
+        ENCHANTMENT_MANAGER.register("Unbreaking", 34, 5, 3, l -> 5 + (l - 1) * 10, l -> (1 + l * 10) + 50, null);
+        ENCHANTMENT_MANAGER.register("Fortune", 35, 2, 3, l -> 20 + (l - 1) * 12, l -> (1 + l * 10) + 50, new int[]{33});
         ENCHANTMENT_MANAGER.register("Power", 48, 10, 5, l -> 1 + (l - 1) * 10, l -> (1 + (l - 1) * 10) + 15, null);
         ENCHANTMENT_MANAGER.register("Punch", 49, 2, 2, l -> 12 + (l - 1) * 20, l -> (12 + (l - 1) * 20) + 25, null);
         ENCHANTMENT_MANAGER.register("Flame", 50, 2, 1, l -> 20, l -> 50, null);
@@ -71,7 +71,7 @@ public class Four implements Version {
 
     @Override
     public int getMaxLevels() {
-        return 30;
+        return 50;
     }
 
     @Override
@@ -87,7 +87,7 @@ public class Four implements Version {
 
     @Override
     public int getMaxBookShelves() {
-        return 15;
+        return 30;
     }
 
     @Override
@@ -103,81 +103,57 @@ public class Four implements Version {
     @Override
     public int[] getEnchantLevels(Random random, int books) {
         int[] levels = new int[3];
-        int intermediate = random.nextInt(8) + 1 + (books >> 1) + random.nextInt(books + 1);
-        levels[0] = Math.max(intermediate / 3, 1);
-        intermediate = random.nextInt(8) + 1 + (books >> 1) + random.nextInt(books + 1);
-        levels[1] = (intermediate * 2 / 3 + 1);
-        intermediate = random.nextInt(8) + 1 + (books >> 1) + random.nextInt(books + 1);
-        levels[2] = Math.max(intermediate, books * 2);
+        int booksStep1 = 1 + (books >> 1) + random.nextInt(books + 1);
+        int booksStep2 = random.nextInt(5) + booksStep1;
+        levels[0] = ((booksStep2 >> 1) + 1);
+        booksStep1 = 1 + (books >> 1) + random.nextInt(books + 1);
+        booksStep2 = random.nextInt(5) + booksStep1;
+        levels[1] = (booksStep2 * 2 / 3 + 1);
+        booksStep1 = 1 + (books >> 1) + random.nextInt(books + 1);
+        booksStep2 = random.nextInt(5) + booksStep1;
+        levels[2] = booksStep2;
         return levels;
     }
 
     @Override
-    public void reverseLevels(RandomReverser reverser, int[] cycle) {
-        for (int calls = 0; calls < 2; calls++) {
+    public void reverseExtremes(RandomReverser reverser, int advances, boolean isLow) {
+        for (int i = 0; i < (advances * 3)+2; i++) {
             reverser.consumeNextLongCalls(1);
-            reverser.consumeNextIntCalls(1, 8);
-            reverser.consumeNextIntCalls(1, 1);
-            reverser.consumeNextIntCalls(1, 8);
-            reverser.consumeNextIntCalls(1, 1);
-            reverser.consumeNextIntCalls(1, 8);
-            reverser.consumeNextIntCalls(1, 1);
+            reverser.consumeNextIntCalls(1, 31);
+            reverser.consumeNextIntCalls(1, 5);
+            reverser.consumeNextIntCalls(1, 31);
+            reverser.consumeNextIntCalls(1, 5);
+            reverser.consumeNextIntCalls(1, 31);
+            reverser.consumeNextIntCalls(1, 5);
         }
 
         reverser.consumeNextLongCalls(1);
+        reverser.consumeNextIntCalls(1, 31);
+        reverser.consumeNextIntCalls(1, 5);
+        reverser.consumeNextIntCalls(1, 31);
+        reverser.consumeNextIntCalls(1, 5);
 
-        reverser.addNextIntCall(8, cycle[0] == 2 ? 5 : 0, cycle[0] == 2 ? 7 : 4);
-        reverser.consumeNextIntCalls(1, 1);
-
-        int secondMin = 0;
-        int secondMax = 0;
-
-        switch (cycle[1]) {
-            case 1:
-                secondMin = 0;
-                secondMax = 0;
-                break;
-            case 2:
-                secondMin = 1;
-                secondMax = 1;
-                break;
-            case 3:
-                secondMin = 2;
-                secondMax = 3;
-                break;
-            case 4:
-                secondMin = 4;
-                secondMax = 4;
-                break;
-            case 5:
-                secondMin = 5;
-                secondMax = 6;
-                break;
-            case 6:
-                secondMin = 7;
-                secondMax = 7;
-                break;
+        if (isLow) {
+            reverser.addNextIntCall(31, 0, 0);
+            reverser.addNextIntCall(5, 0, 0);
         }
+        else {
+            reverser.addNextIntCall(31, 30, 30);
+            reverser.addNextIntCall(5, 4, 4);
+        }
+    }
 
-        reverser.addNextIntCall(8, secondMin, secondMax);
-        reverser.consumeNextIntCalls(1, 1);
-
-        reverser.addNextIntCall(8, cycle[2]-1, cycle[2]-1);
-        reverser.consumeNextIntCalls(1, 1);
+    @Override
+    public int getExtremesNeeded() {
+        return 11;
     }
 
     @Override
     public List<EnchantData> getItemEnchantments(Random random, int enchantability, String item, int level) {
-        enchantability/=2;
         enchantability = 1 + random.nextInt((enchantability >> 1)+1) + random.nextInt((enchantability >> 1)+1);
         int enchantStep1 = enchantability + level;
-        float enchantStep2 = (random.nextFloat() + random.nextFloat() - 1.0F) * 0.15F;
+        float enchantStep2 = (random.nextFloat() + random.nextFloat() - 1.0F) * 0.25F;
         int enchantStep3 = (int)((float)enchantStep1 * (1.0F + enchantStep2) + 0.5F);
-
-        if (enchantStep3 < 1) {
-            enchantStep3 = 1;
-        }
-
         List<EnchantData> enchantmentsFinal = null;
 
         HashMap<Integer, EnchantData> enchantmentCandidates = null;
@@ -208,7 +184,7 @@ public class Four implements Version {
 
                 enchantmentsFinal = new ArrayList<>();
                 enchantmentsFinal.add(selectedEnchant);
-                for (int multipleChance = enchantStep3; random.nextInt(50) <= multipleChance; multipleChance >>= 1) {
+                for (int multipleChance = enchantStep3 >> 1; random.nextInt(50) <= multipleChance; multipleChance >>= 1) {
                     Iterator<Integer> multipleIterator = enchantmentCandidates.keySet().iterator();
                     while (multipleIterator.hasNext()) {
                         int multipleId = multipleIterator.next();
@@ -234,7 +210,7 @@ public class Four implements Version {
 
     @Override
     public CrackType getCrackType() {
-        return CrackType.LEVELS;
+        return CrackType.EXTREMES;
     }
 
     private static EnchantData getWeightedEnchantment(Random random, Collection<EnchantData> values) {

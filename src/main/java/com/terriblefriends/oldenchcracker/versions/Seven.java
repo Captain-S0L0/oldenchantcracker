@@ -7,7 +7,7 @@ import com.terriblefriends.oldenchcracker.thingmanagers.*;
 import java.util.*;
 
 public class Seven implements Version {
-    //Tools for Minecraft versions 13w36a (1.7) to 13w36b (1.7)
+    //Tools for Minecraft versions 12w50a (1.4.6) to 1.6.4
 
     private static final EnchantmentManager ENCHANTMENT_MANAGER = new EnchantmentManager();
     private static final ItemManager ITEM_MANAGER = new ItemManager();
@@ -36,20 +36,17 @@ public class Seven implements Version {
         ENCHANTMENT_MANAGER.register("Punch", 49, 2, 2, l -> 12 + (l - 1) * 20, l -> (12 + (l - 1) * 20) + 25, null);
         ENCHANTMENT_MANAGER.register("Flame", 50, 2, 1, l -> 20, l -> 50, null);
         ENCHANTMENT_MANAGER.register("Infinity", 51, 1, 1, l -> 20, l -> 50, null);
-        ENCHANTMENT_MANAGER.register("Luck of the Sea", 61, 2, 3, l -> 15 + (l - 1) * 9, l -> (1 + l * 10) + 50, new int[]{35});
-        ENCHANTMENT_MANAGER.register("Lure", 62, 2, 3, l -> 15 + (l - 1) * 9, l -> (1 + l * 10) + 50, null);
 
-        ITEM_MANAGER.register("Helmet", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 5, 6, 34});
-        ITEM_MANAGER.register("Chestplate", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 7, 34});
-        ITEM_MANAGER.register("Leggings", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 34});
-        ITEM_MANAGER.register("Boots", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 2, 3, 4, 34});
-        ITEM_MANAGER.register("Sword", new int[]{0, 1, 2, 3, 4}, new int[]{16, 17, 18, 19, 20, 21, 34});
+        ITEM_MANAGER.register("Helmet", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 5, 6});
+        ITEM_MANAGER.register("Chestplate", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 7});
+        ITEM_MANAGER.register("Leggings", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4});
+        ITEM_MANAGER.register("Boots", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 2, 3, 4});
+        ITEM_MANAGER.register("Sword", new int[]{0, 1, 2, 3, 4}, new int[]{16, 17, 18, 19, 20, 21});
         ITEM_MANAGER.register("Pickaxe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
         ITEM_MANAGER.register("Axe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
         ITEM_MANAGER.register("Shovel", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
-        ITEM_MANAGER.register("Bow", new int[]{10}, new int[]{34, 48, 49, 50, 51});
-        ITEM_MANAGER.register("Book", new int[]{11}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 32, 33, 34, 35, 48, 49, 50, 51, 61, 62});
-        ITEM_MANAGER.register("Fishing Rod", new int[]{12}, new int[]{34, 61, 62});
+        ITEM_MANAGER.register("Bow", new int[]{10}, new int[]{48, 49, 50, 51});
+        ITEM_MANAGER.register("Book", new int[]{11}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 32, 33, 34, 35, 48, 49, 50, 51});
 
         MATERIAL_MANAGER.register(0, "ToolWood", 15);
         MATERIAL_MANAGER.register(1, "ToolStone", 5);
@@ -63,7 +60,6 @@ public class Seven implements Version {
         MATERIAL_MANAGER.register(9, "ArmorGold", 25);
         MATERIAL_MANAGER.register(10, "Bow", 1);
         MATERIAL_MANAGER.register(11, "Book", 1);
-        MATERIAL_MANAGER.register(12, "Fishing Rod", 1);
     }
 
     @Override
@@ -235,7 +231,7 @@ public class Seven implements Version {
             }
         }
 
-        if (item.equals("Book") && enchantmentsFinal != null) {
+        if (item.equals("Book")) {
             EnchantData bookEnchant = enchantmentsFinal.get(random.nextInt(enchantmentsFinal.size()));
             enchantmentsFinal.clear();
             enchantmentsFinal.add(bookEnchant);

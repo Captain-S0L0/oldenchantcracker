@@ -26,17 +26,18 @@ public class Main {
     /*
     ZERO b1.9pre4 - fortune + silk
     ONE b1.9pre5 - wooden tool enchantability increased
-    TWO 1.1 - bows can be enchanted, level formula change
-    THREE 12w18a - internal server
-    FOUR 12w22a (1.3) - 50 -> 30 level change
-    FIVE 12w49a (1.4.6) - enchanted books added
-    SIX 12w50a (1.4.6) - chestplates can receive thorns, shears can receive silk
-    SEVEN 13w36a (1.7) - fishing rods can be enchanted, armor + bows can receive unbreaking
-    EIGHT 13w37a (1.7) - changes to how enchantments are selected for books
+    TWO 12w01a - level formula change
+    THREE 1.1 - bows can be enchanted
+    FOUR 12w18a - internal server
+    FIVE 12w22a (1.3) - 50 -> 30 level change
+    SIX 12w49a (1.4.6) - enchanted books added
+    SEVEN 12w50a (1.4.6) - chestplates can receive thorns, shears can receive silk
+    EIGHT 13w36a (1.7) - fishing rods can be enchanted, armor + bows can receive unbreaking
+    NINE 13w37a (1.7) - changes to how enchantments are selected for books
     14w02a (1.8) - end of this tool
      */
 
-    private static final String[] VERSION_STRINGS = new String[]{"b1.9pre4", "b1.9pre5 - 1.0", "1.1 - 12w17b (1.2.5)", "12w18a - 12w21b", "12w22a (1.3) - 12w48a (1.4.5)", "12w49a", "12w50a (1.4.6) - 1.6.4", "13w36a - 13w36b", "13w37a (1.7) - 1.7.10"};
+    private static final String[] VERSION_STRINGS = new String[]{"b1.9pre4", "b1.9pre5 - 11w50a (1.0)", "12w01a", "1.1 - 12w17b (1.2.5)", "12w18a - 12w21b", "12w22a (1.3) - 12w48a (1.4.5)", "12w49a", "12w50a (1.4.6) - 1.6.4", "13w36a - 13w36b", "13w37a (1.7) - 1.7.10"};
     private static Version VERSION = new Zero();
     private static final HashMap<Enchantment, JComponent[]> MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS = new HashMap<>();
     private static int BOOKSHELVES = VERSION.getMaxBookShelves();
@@ -172,6 +173,9 @@ public class Main {
                             break;
                         case 8:
                             VERSION = new Eight();
+                            break;
+                        case 9:
+                            VERSION = new Nine();
                             break;
 
                     }

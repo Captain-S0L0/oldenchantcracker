@@ -7,7 +7,7 @@ import com.terriblefriends.oldenchcracker.thingmanagers.*;
 import java.util.*;
 
 public class Six implements Version {
-    //Tools for Minecraft versions 12w50a (1.4.6) to 1.6.4
+    //Tools for Minecraft version 12w49a
 
     private static final EnchantmentManager ENCHANTMENT_MANAGER = new EnchantmentManager();
     private static final ItemManager ITEM_MANAGER = new ItemManager();
@@ -21,7 +21,6 @@ public class Six implements Version {
         ENCHANTMENT_MANAGER.register("Projectile Protection", 4, 5, 4, l -> 3 + (l - 1) * 6, l -> (3 + (l - 1) * 6) + 15, new int[]{0, 1, 3});
         ENCHANTMENT_MANAGER.register("Respiration", 5, 2, 3, l -> 10 * l, l -> (10 * l) + 30, null);
         ENCHANTMENT_MANAGER.register("Aqua Affinity", 6, 2, 1, l -> 1, l -> 41, null);
-        ENCHANTMENT_MANAGER.register("Thorns", 7, 1, 3, l -> 10 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
         ENCHANTMENT_MANAGER.register("Sharpness", 16, 10, 5, l -> 1 + (l - 1) * 11, l -> (1 + (l - 1) * 11) + 20, new int[]{17, 18});
         ENCHANTMENT_MANAGER.register("Smite", 17, 5, 5, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 20, new int[]{16, 18});
         ENCHANTMENT_MANAGER.register("Bane of Arthropods", 18, 5, 5, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 20, new int[]{16, 17});
@@ -38,7 +37,7 @@ public class Six implements Version {
         ENCHANTMENT_MANAGER.register("Infinity", 51, 1, 1, l -> 20, l -> 50, null);
 
         ITEM_MANAGER.register("Helmet", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 5, 6});
-        ITEM_MANAGER.register("Chestplate", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 7});
+        ITEM_MANAGER.register("Chestplate", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4});
         ITEM_MANAGER.register("Leggings", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4});
         ITEM_MANAGER.register("Boots", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 2, 3, 4});
         ITEM_MANAGER.register("Sword", new int[]{0, 1, 2, 3, 4}, new int[]{16, 17, 18, 19, 20, 21});
@@ -46,7 +45,7 @@ public class Six implements Version {
         ITEM_MANAGER.register("Axe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
         ITEM_MANAGER.register("Shovel", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
         ITEM_MANAGER.register("Bow", new int[]{10}, new int[]{48, 49, 50, 51});
-        ITEM_MANAGER.register("Book", new int[]{11}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 32, 33, 34, 35, 48, 49, 50, 51});
+        ITEM_MANAGER.register("Book", new int[]{11}, new int[]{0, 1, 2, 3, 4, 5, 6, 16, 17, 18, 19, 20, 21, 32, 33, 34, 35, 48, 49, 50, 51});
 
         MATERIAL_MANAGER.register(0, "ToolWood", 15);
         MATERIAL_MANAGER.register(1, "ToolStone", 5);

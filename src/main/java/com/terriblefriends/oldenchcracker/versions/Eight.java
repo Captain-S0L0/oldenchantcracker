@@ -7,7 +7,7 @@ import com.terriblefriends.oldenchcracker.thingmanagers.*;
 import java.util.*;
 
 public class Eight implements Version {
-    //Tools for Minecraft versions 13w37a (1.7) to 1.7.10
+    //Tools for Minecraft versions 13w36a (1.7) to 13w36b (1.7)
 
     private static final EnchantmentManager ENCHANTMENT_MANAGER = new EnchantmentManager();
     private static final ItemManager ITEM_MANAGER = new ItemManager();
@@ -236,15 +236,9 @@ public class Eight implements Version {
         }
 
         if (item.equals("Book") && enchantmentsFinal != null) {
-            int special = random.nextInt(enchantmentsFinal.size());
-            List<EnchantData> copyEverythingButSpecial = new ArrayList<>();
-            for (int i = 0; i < enchantmentsFinal.size(); i++) {
-                if (i != special) {
-                    copyEverythingButSpecial.add(enchantmentsFinal.get(i));
-                }
-            }
+            EnchantData bookEnchant = enchantmentsFinal.get(random.nextInt(enchantmentsFinal.size()));
             enchantmentsFinal.clear();
-            enchantmentsFinal.addAll(copyEverythingButSpecial);
+            enchantmentsFinal.add(bookEnchant);
         }
 
 

@@ -32,10 +32,6 @@ public class Two implements Version {
         ENCHANTMENT_MANAGER.register("Silk Touch", 33, 1, 1, l -> 25, l -> (1 + l * 10) + 50, new int[]{35});
         ENCHANTMENT_MANAGER.register("Unbreaking", 34, 5, 3, l -> 5 + (l - 1) * 10, l -> (1 + l * 10) + 50, null);
         ENCHANTMENT_MANAGER.register("Fortune", 35, 2, 3, l -> 20 + (l - 1) * 12, l -> (1 + l * 10) + 50, new int[]{33});
-        ENCHANTMENT_MANAGER.register("Power", 48, 10, 5, l -> 1 + (l - 1) * 10, l -> (1 + (l - 1) * 10) + 15, null);
-        ENCHANTMENT_MANAGER.register("Punch", 49, 2, 2, l -> 12 + (l - 1) * 20, l -> (12 + (l - 1) * 20) + 25, null);
-        ENCHANTMENT_MANAGER.register("Flame", 50, 2, 1, l -> 20, l -> 50, null);
-        ENCHANTMENT_MANAGER.register("Infinity", 51, 1, 1, l -> 20, l -> 50, null);
 
         ITEM_MANAGER.register("Helmet", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 5, 6});
         ITEM_MANAGER.register("Chestplate", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4});
@@ -45,7 +41,6 @@ public class Two implements Version {
         ITEM_MANAGER.register("Pickaxe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
         ITEM_MANAGER.register("Axe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
         ITEM_MANAGER.register("Shovel", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
-        ITEM_MANAGER.register("Bow", new int[]{10}, new int[]{48, 49, 50, 51});
 
         MATERIAL_MANAGER.register(0, "ToolWood", 15);
         MATERIAL_MANAGER.register(1, "ToolStone", 5);
@@ -57,7 +52,6 @@ public class Two implements Version {
         MATERIAL_MANAGER.register(7, "ArmorIron", 9);
         MATERIAL_MANAGER.register(8, "ArmorDiamond", 10);
         MATERIAL_MANAGER.register(9, "ArmorGold", 25);
-        MATERIAL_MANAGER.register(10, "Bow", 1);
     }
 
     @Override

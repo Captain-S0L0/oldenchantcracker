@@ -7,7 +7,7 @@ import com.terriblefriends.oldenchcracker.thingmanagers.*;
 import java.util.*;
 
 public class Five implements Version {
-    //Tools for Minecraft version 12w49a
+    //Tools for Minecraft versions 12w22a (1.3 snap) to 12w49a (1.4.6)
 
     private static final EnchantmentManager ENCHANTMENT_MANAGER = new EnchantmentManager();
     private static final ItemManager ITEM_MANAGER = new ItemManager();
@@ -45,7 +45,6 @@ public class Five implements Version {
         ITEM_MANAGER.register("Axe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
         ITEM_MANAGER.register("Shovel", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
         ITEM_MANAGER.register("Bow", new int[]{10}, new int[]{48, 49, 50, 51});
-        ITEM_MANAGER.register("Book", new int[]{11}, new int[]{0, 1, 2, 3, 4, 5, 6, 16, 17, 18, 19, 20, 21, 32, 33, 34, 35, 48, 49, 50, 51});
 
         MATERIAL_MANAGER.register(0, "ToolWood", 15);
         MATERIAL_MANAGER.register(1, "ToolStone", 5);
@@ -58,7 +57,6 @@ public class Five implements Version {
         MATERIAL_MANAGER.register(8, "ArmorDiamond", 10);
         MATERIAL_MANAGER.register(9, "ArmorGold", 25);
         MATERIAL_MANAGER.register(10, "Bow", 1);
-        MATERIAL_MANAGER.register(11, "Book", 1);
     }
 
     @Override
@@ -228,12 +226,6 @@ public class Five implements Version {
                     }
                 }
             }
-        }
-
-        if (item.equals("Book")) {
-            EnchantData bookEnchant = enchantmentsFinal.get(random.nextInt(enchantmentsFinal.size()));
-            enchantmentsFinal.clear();
-            enchantmentsFinal.add(bookEnchant);
         }
 
 
