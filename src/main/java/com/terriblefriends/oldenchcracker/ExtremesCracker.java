@@ -6,10 +6,10 @@ import com.terriblefriends.oldenchcracker.versions.Version;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Random;
 
-public class ExtremesCracker extends Thread {
+public class ExtremesCracker {
     private static final long RANDOM_MULTIPLIER = 0x5DEECE66DL;
     private final int[] advances;
     private final boolean[] isLow;
@@ -24,9 +24,8 @@ public class ExtremesCracker extends Thread {
         this.version = version;
     }
 
-    @Override
     public void run() {
-        RandomReverser reverser = new RandomReverser(Collections.EMPTY_LIST);
+        RandomReverser reverser = new RandomReverser(new ArrayList<>(0));
 
         for (int i = 0; i < advances.length; i++) {
             this.version.reverseExtremes(reverser, advances[i], isLow[i]);

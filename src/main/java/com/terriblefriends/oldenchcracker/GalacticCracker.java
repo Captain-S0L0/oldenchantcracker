@@ -4,11 +4,10 @@ import com.seedfinding.latticg.RandomReverser;
 import com.terriblefriends.oldenchcracker.versions.Version;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class GalacticCracker extends Thread {
+public class GalacticCracker {
     private static final int WORD_LIST_LENGTH = 55;
     private static final long RANDOM_MULTIPLIER = 0x5DEECE66DL;
     private static final long RANDOM_MULTIPLIER_INVERSE = 0xdfe05bcb1365L;
@@ -29,9 +28,8 @@ public class GalacticCracker extends Thread {
         this.version = version;
     }
 
-    @Override
     public void run() {
-        RandomReverser reverser = new RandomReverser(Collections.EMPTY_LIST);
+        RandomReverser reverser = new RandomReverser(new ArrayList<>(0));
 
         for (int slot = 0; slot < 3; slot++) {
             boolean four = words[slot][3] != -1;
@@ -43,7 +41,6 @@ public class GalacticCracker extends Thread {
                 reverser.addNextIntCall(WORD_LIST_LENGTH, words[slot][3], words[slot][3]);
             }
         }
-        reverser.setVerbose(true);
         long[] seeds = reverser.findAllValidSeeds().toArray();
         if (seeds.length > 1) {
             System.out.println("ERROR! Found more than 1 valid seed!");

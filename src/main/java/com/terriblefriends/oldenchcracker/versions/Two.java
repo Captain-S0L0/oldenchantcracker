@@ -144,6 +144,11 @@ public class Two implements Version {
     }
 
     @Override
+    public int getMaxEnchantability(int enchantability) {
+        return (int)((float)(1 + ((enchantability >> 1) * 2) + this.getMaxLevels()) * 1.25F + 0.5F);
+    }
+
+    @Override
     public List<EnchantData> getItemEnchantments(Random random, int enchantability, String item, int level) {
         enchantability = 1 + random.nextInt((enchantability >> 1)+1) + random.nextInt((enchantability >> 1)+1);
         int enchantStep1 = enchantability + level;

@@ -15,13 +15,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class Main {
-    private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(1);
 
     /*
     ZERO b1.9pre4 - fortune + silk
@@ -52,7 +47,6 @@ public class Main {
     private static long POST_RNG_SEED = -1;
     private static int MAX_ADVANCES = 10000;
     private static boolean ADVANCED_ADVANCES = false;
-    private static Future THREAD_TASK = null;
 
     public static void main(String[] args) {
 
@@ -280,6 +274,7 @@ public class Main {
         GALACTIC_CRACKER_PANEL.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         URL galacticChartUrl = Main.class.getResource("/galacticChart.png");
+        assert galacticChartUrl != null;
         ImageIcon chartImage = new ImageIcon(galacticChartUrl);
         JLabel chartLabel = new JLabel(chartImage);
         setPosition(chartLabel, 400,25);
@@ -317,6 +312,9 @@ public class Main {
         galacticCrackerResultMessage.setBounds(25, 130, 400, galacticCrackerResultMessage.getPreferredSize().height);
         GALACTIC_CRACKER_PANEL.add(galacticCrackerResultMessage);
 
+        JButton galacticCrackerClearButton = new JButton("Clear Data");
+        setPosition(galacticCrackerClearButton, 125, 100);
+
         JTextField galacticCrackerResult = new JTextField(20);
         galacticCrackerResult.addActionListener((event) -> {
             if (galacticCrackerResult.isEditable()) {
@@ -336,58 +334,52 @@ public class Main {
         JButton crackButton = new JButton("Crack RNG");
 
         crackButton.addActionListener((event) -> {
-            if (THREAD_TASK == null) {
-                galacticCrackerResultMessage.setText("Calculating...");
-                crackButton.setEnabled(false);
-                int[][] wordToInt = new int[3][4];
-                int[] levelsToInt = new int[3];
-                for (int slot = 0; slot < 3; slot++) {
-                    fourWordCheck[slot].setEnabled(false);
-                    slotLevels[slot].setEditable(false);
-                    levelsToInt[slot] = Integer.parseInt(slotLevels[slot].getText());
-                    for (int word = 0; word < 4; word++) {
-                        if (slotWords[slot][word].getText().length() != 0) {
-                            wordToInt[slot][word] = Integer.parseInt(slotWords[slot][word].getText());
-                        } else {
-                            wordToInt[slot][word] = -1;
-                        }
-                        slotWords[slot][word].setEditable(false);
+            int[][] wordToInt = new int[3][4];
+            int[] levelsToInt = new int[3];
+            for (int slot = 0; slot < 3; slot++) {
+                fourWordCheck[slot].setEnabled(false);
+                slotLevels[slot].setEditable(false);
+                levelsToInt[slot] = Integer.parseInt(slotLevels[slot].getText());
+                for (int word = 0; word < 4; word++) {
+                    if (slotWords[slot][word].getText().length() != 0) {
+                        wordToInt[slot][word] = Integer.parseInt(slotWords[slot][word].getText());
+                    } else {
+                        wordToInt[slot][word] = -1;
                     }
+                    slotWords[slot][word].setEditable(false);
                 }
+            }
 
 
-                GalacticCracker galacticCracker = new GalacticCracker(wordToInt, levelsToInt, BOOKSHELVES, VERSION);
-                THREAD_TASK = THREAD_POOL.submit(galacticCracker);
-                while (!THREAD_TASK.isDone()) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+            GalacticCracker galacticCracker = new GalacticCracker(wordToInt, levelsToInt, BOOKSHELVES, VERSION);
+
+            galacticCrackerResultMessage.setText("Calculating...");
+            crackButton.setEnabled(false);
+            galacticCrackerClearButton.setEnabled(false);
+
+            Thread waitThread = new Thread(() -> {
                 try {
-                    THREAD_TASK.get();
-
-                    if (galacticCracker.getFailed()) {
-                        throw new InterruptedException("Cracker Failed - No Valid Seeds Found");
-                    }
-                    else {
-                        galacticCrackerResultMessage.setText("Cracked RNG!");
-
-                        RNG_SEED = galacticCracker.getResult();
-
-                        galacticCrackerResult.setText(String.valueOf(RNG_SEED));
-
-                    }
-                    THREAD_TASK = null;
-                }
-                catch (ExecutionException | InterruptedException e) {
-                    THREAD_TASK = null;
+                    galacticCracker.run();
+                } catch (Exception e) {
                     System.out.println("Error cracking RNG!");
                     e.printStackTrace();
-                    galacticCrackerResultMessage.setText("Error cracking RNG!");
+                    galacticCrackerResultMessage.setText("Unknown error cracking RNG! (See logs)");
                 }
+
+                if (galacticCracker.getFailed()) {
+                    galacticCrackerResultMessage.setText("Cracker Failed - No Valid Seeds Found!");
+                } else {
+                    galacticCrackerResultMessage.setText("Cracked RNG!");
+
+                    RNG_SEED = galacticCracker.getResult();
+
+                    galacticCrackerResult.setText(String.valueOf(RNG_SEED));
+
+                }
+
                 crackButton.setEnabled(true);
+                galacticCrackerClearButton.setEnabled(true);
+
                 for (int slot = 0; slot < 3; slot++) {
                     fourWordCheck[slot].setEnabled(true);
                     slotLevels[slot].setEditable(true);
@@ -397,13 +389,12 @@ public class Main {
                         }
                     }
                 }
+            });
 
-            }
-            else {
-                galacticCrackerResultMessage.setText("Error! Already cracking RNG!");
-            }
+            waitThread.start();
 
         });
+
         crackButton.setEnabled(false);
         setPosition(crackButton, 20, 100);
         GALACTIC_CRACKER_PANEL.add(crackButton);
@@ -468,6 +459,10 @@ public class Main {
 
                     @Override
                     public void keyReleased(KeyEvent e) {
+                        if (!word.isEditable()) {
+                            return;
+                        }
+
                         boolean valid = true;
                         for (int slot = 0; slot < 3; slot++) {
                             if (slotLevels[slot].getText().length() == 0) {
@@ -497,8 +492,6 @@ public class Main {
             }
         }
 
-        JButton galacticCrackerClearButton = new JButton("Clear Data");
-        setPosition(galacticCrackerClearButton, 125, 100);
         galacticCrackerClearButton.addActionListener((event) -> {
             for (JCheckBox box : fourWordCheck) {
                 box.setSelected(false);
@@ -684,54 +677,49 @@ public class Main {
         JCheckBox[] isLowCheckBoxes = new JCheckBox[VERSION.getExtremesNeeded()];
         JTextField[] advancesTextFields = new JTextField[VERSION.getExtremesNeeded()];
 
+        JButton clearButton = new JButton("Clear Data");
+        setPosition(clearButton, 125, 50+(VERSION.getExtremesNeeded()*20));
+
         JButton crackButton = new JButton("Crack RNG");
-
         crackButton.addActionListener((event) -> {
-            if (THREAD_TASK == null) {
-                resultMessage.setText("Calculating...");
-                crackButton.setEnabled(false);
-                int[] advances = new int[VERSION.getExtremesNeeded()];
-                boolean[] isLow = new boolean[VERSION.getExtremesNeeded()];
+            int[] advances = new int[VERSION.getExtremesNeeded()];
+            boolean[] isLow = new boolean[VERSION.getExtremesNeeded()];
 
-                for (int slot = 0; slot < VERSION.getExtremesNeeded(); slot++) {
-                    isLowCheckBoxes[slot].setEnabled(false);
-                    advancesTextFields[slot].setEditable(false);
-                    advances[slot] = Integer.parseInt(advancesTextFields[slot].getText());
-                    isLow[slot] = isLowCheckBoxes[slot].isSelected();
-                }
+            for (int slot = 0; slot < VERSION.getExtremesNeeded(); slot++) {
+                isLowCheckBoxes[slot].setEnabled(false);
+                advancesTextFields[slot].setEditable(false);
+                advances[slot] = Integer.parseInt(advancesTextFields[slot].getText());
+                isLow[slot] = isLowCheckBoxes[slot].isSelected();
+            }
 
-                ExtremesCracker cracker = new ExtremesCracker(advances, isLow, VERSION);
-                THREAD_TASK = THREAD_POOL.submit(cracker);
-                while (!THREAD_TASK.isDone()) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+            ExtremesCracker cracker = new ExtremesCracker(advances, isLow, VERSION);
+
+            resultMessage.setText("Calculating...");
+            crackButton.setEnabled(false);
+            clearButton.setEnabled(false);
+
+            Thread waitThread = new Thread(() -> {
                 try {
-                    THREAD_TASK.get();
-
-                    if (cracker.getFailed()) {
-                        throw new InterruptedException("Cracker Failed - No Valid Seeds Found");
-                    }
-                    else {
-                        resultMessage.setText("Cracked RNG!");
-
-                        RNG_SEED = cracker.getResult();
-
-                        crackerResult.setText(String.valueOf(RNG_SEED));
-
-                    }
-                    THREAD_TASK = null;
-                }
-                catch (ExecutionException | InterruptedException e) {
-                    THREAD_TASK = null;
+                    cracker.run();
+                } catch (Exception e) {
                     System.out.println("Error cracking RNG!");
                     e.printStackTrace();
-                    resultMessage.setText("Error cracking RNG!");
+                    resultMessage.setText("Unknown error cracking RNG! (See logs)");
                 }
+
+                if (cracker.getFailed()) {
+                    resultMessage.setText("Cracker Failed - No Valid Seeds Found!");
+                } else {
+                    resultMessage.setText("Cracked RNG!");
+
+                    RNG_SEED = cracker.getResult();
+
+                    crackerResult.setText(String.valueOf(RNG_SEED));
+
+                }
+
                 crackButton.setEnabled(true);
+                clearButton.setEnabled(true);
                 for (int slot = 0; slot < VERSION.getExtremesNeeded(); slot++) {
                     if (slot != 0) {
                         advancesTextFields[slot].setEditable(true);
@@ -739,11 +727,9 @@ public class Main {
                     isLowCheckBoxes[slot].setEnabled(true);
 
                 }
+            });
 
-            }
-            else {
-                resultMessage.setText("Error! Already cracking RNG!");
-            }
+            waitThread.start();
 
         });
         crackButton.setEnabled(false);
@@ -776,6 +762,10 @@ public class Main {
 
                 @Override
                 public void keyReleased(KeyEvent e) {
+                    if (!word.isEditable()) {
+                        return;
+                    }
+
                     boolean valid = true;
                     for (int slot = 0; slot < VERSION.getExtremesNeeded(); slot++) {
                         String s = advancesTextFields[slot].getText();
@@ -803,8 +793,6 @@ public class Main {
             EXTREMES_CRACKER_PANEL.add(check);
         }
 
-        JButton clearButton = new JButton("Clear Data");
-        setPosition(clearButton, 125, 50+(VERSION.getExtremesNeeded()*20));
         clearButton.addActionListener((event) -> {
             for (JCheckBox box : isLowCheckBoxes) {
                 box.setSelected(false);
@@ -856,13 +844,12 @@ public class Main {
                 resultMessage.setText("Set MC window to default size and GUI size 2, place & hover over item in table slot");
                 crackerResult.setText("F4 start, F8 pause, F12 force stop");
 
-                boolean windows = autoSearchType.getSelectedItem().equals(autoSearchTypes[0]);
+                boolean windows = Objects.equals(autoSearchType.getSelectedItem(), autoSearchTypes[0]);
 
                 new AutoExtremeSearcher(VERSION, delay, x, y, windows, screenshots, autoSearchTestMode.isSelected(), advancesTextFields, isLowCheckBoxes, crackButton, resultMessage);
             }
             catch (NumberFormatException e) {
                 resultMessage.setText("Error: failed to parse integer option!");
-                return;
             }
         });
         EXTREMES_CRACKER_PANEL.add(enableSearcherButton);
@@ -910,62 +897,57 @@ public class Main {
 
         JTextField[][] cycleLevels = new JTextField[10][3];
 
+        JButton levelCrackerClearButton = new JButton("Clear Data");
+        setPosition(levelCrackerClearButton, 150, 240);
+
         JButton levelCrackButton = new JButton("Crack RNG");
         levelCrackButton.setEnabled(false);
         levelCrackButton.addActionListener((event) -> {
-            if (THREAD_TASK == null) {
-                levelCrackerResultMessage.setText("Calculating...");
-                levelCrackButton.setEnabled(false);
-                int[][] levelData = new int[10][3];
-                for (int cycle = 0; cycle < 10; cycle++) {
-                    for (int slot = 0; slot < 3; slot++) {
-                        levelData[cycle][slot] = Integer.parseInt(cycleLevels[cycle][slot].getText());
-                        cycleLevels[cycle][slot].setEditable(false);
-                    }
+            int[][] levelData = new int[10][3];
+            for (int cycle = 0; cycle < 10; cycle++) {
+                for (int slot = 0; slot < 3; slot++) {
+                    levelData[cycle][slot] = Integer.parseInt(cycleLevels[cycle][slot].getText());
+                    cycleLevels[cycle][slot].setEditable(false);
                 }
+            }
 
-                LevelCracker levelCracker = new LevelCracker(levelData, VERSION);
-                THREAD_TASK = THREAD_POOL.submit(levelCracker);
-                while (!THREAD_TASK.isDone()) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+            LevelCracker cracker = new LevelCracker(levelData, VERSION);
+
+            levelCrackerResultMessage.setText("Calculating...");
+            levelCrackButton.setEnabled(false);
+            levelCrackerClearButton.setEnabled(false);
+
+            Thread waitThread = new Thread(() -> {
                 try {
-                    THREAD_TASK.get();
-
-                    if (levelCracker.getFailed()) {
-                        throw new InterruptedException("Cracker Failed - No Valid Seeds Found");
-                    }
-                    else {
-                        levelCrackerResultMessage.setText("Cracked RNG!");
-
-                        RNG_SEED = levelCracker.getResult();
-
-                        levelCrackerResult.setText(String.valueOf(RNG_SEED));
-
-                    }
-                    THREAD_TASK = null;
-                }
-                catch (ExecutionException | InterruptedException e) {
-                    THREAD_TASK = null;
+                    cracker.run();
+                } catch (Exception e) {
                     System.out.println("Error cracking RNG!");
                     e.printStackTrace();
-                    levelCrackerResultMessage.setText("Error cracking RNG!");
+                    levelCrackerResultMessage.setText("Unknown error cracking RNG! (See logs)");
                 }
+
+                if (cracker.getFailed()) {
+                    levelCrackerResultMessage.setText("Cracker Failed - No Valid Seeds Found!");
+                } else {
+                    levelCrackerResultMessage.setText("Cracked RNG!");
+
+                    RNG_SEED = cracker.getResult();
+
+                    levelCrackerResult.setText(String.valueOf(RNG_SEED));
+
+                }
+
                 levelCrackButton.setEnabled(true);
+                levelCrackerClearButton.setEnabled(true);
                 for (int cycle = 0; cycle < 10; cycle++) {
                     for (int slot = 0; slot < 3; slot++) {
                         cycleLevels[cycle][slot].setEditable(true);
                     }
                 }
+            });
 
-            }
-            else {
-                levelCrackerResultMessage.setText("Error! Already cracking RNG!");
-            }
+            waitThread.start();
+
         });
         setPosition(levelCrackButton, 25, 240);
         LEVEL_CRACKER_PANEL.add(levelCrackButton);
@@ -1002,6 +984,10 @@ public class Main {
 
                     @Override
                     public void keyReleased(KeyEvent e) {
+                        if (!word.isEditable()) {
+                            return;
+                        }
+
                         boolean valid = true;
                         for (int cycle = 0; cycle < 10; cycle++) {
                             for (int slot = 0; slot < 3; slot++) {
@@ -1024,8 +1010,6 @@ public class Main {
             }
         }
 
-        JButton levelCrackerClearButton = new JButton("Clear Data");
-        setPosition(levelCrackerClearButton, 150, 240);
         levelCrackerClearButton.addActionListener((event) -> {
             for (int cycle = 0; cycle < 10; cycle++) {
                 for (int slot = 0; slot < 3; slot++) {
@@ -1085,15 +1069,13 @@ public class Main {
         setPosition(manipulatorConsiderAllCalls, 210, 67);
         MANIPULATOR_PANEL.add(manipulatorConsiderAllCalls);
 
-        manipulatorConsiderAllCalls.addActionListener((event) -> {
-            ADVANCED_ADVANCES = manipulatorConsiderAllCalls.isSelected();
-        });
+        manipulatorConsiderAllCalls.addActionListener((event) -> ADVANCED_ADVANCES = manipulatorConsiderAllCalls.isSelected());
 
         manipulatorLabel = new JLabel("Max Advances:");
         setPosition(manipulatorLabel, 10,100);
         MANIPULATOR_PANEL.add(manipulatorLabel);
 
-        JTextField setupMaxAdvancesField = new JTextField(5);
+        JTextField manipulatorMaxAdvancesField = new JTextField(5);
 
         JLabel manipulatorResultMessage = new JLabel("Doing nothing...");
         manipulatorResultMessage.setBounds(10, 200, 600, manipulatorResultMessage.getPreferredSize().height);
@@ -1120,92 +1102,102 @@ public class Main {
                 return;
             }
 
-            if (THREAD_TASK == null) {
+            HashMap<Integer, EnchantData> desiredEnchants = new HashMap<>();
+            for (Enchantment enchant : MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.keySet()) {
+                JComponent[] components = MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.get(enchant);
+                if (((JCheckBox) components[1]).isSelected()) {
+                    int level = Integer.parseInt((String) Objects.requireNonNull(((JComboBox<?>) components[2]).getSelectedItem()));
+                    desiredEnchants.put(enchant.getId(), new EnchantData(enchant, level));
+                    System.out.println("search for enchantment " + enchant.getName() + " @ level " + level);
+                }
+            }
+
+            if (desiredEnchants.size() == 0) {
+                manipulatorResultMessage.setText("No enchants selected!");
+            } else {
+                Collection<EnchantData> enchantData = desiredEnchants.values();
+
+                if (Objects.equals(manipulatorMaterialSelector.getSelectedItem(), "Book") && !(VERSION instanceof Nine) && desiredEnchants.size() > 1) {
+                    manipulatorResultMessage.setText("More than 1 book enchantment selected!");
+                    return;
+                }
+
+                for (EnchantData data : enchantData) {
+                    Set<Integer> copyIds = new HashSet<>(desiredEnchants.keySet());
+                    copyIds.remove(data.getEnchant().getId());
+                    for (int id : copyIds) {
+                        if (!data.getEnchant().isCompatibleEnchant(id)) {
+                            manipulatorResultMessage.setText("Conflicting enchantments selected!");
+                            return;
+                        }
+                    }
+
+                    if (VERSION.getMaxEnchantability(VERSION.getMaterialEnchantability((String) manipulatorMaterialSelector.getSelectedItem())) < data.getEnchant().getMinEnchantability(data.getLevel())) {
+                        manipulatorResultMessage.setText("Impossible enchantment level selected for " + data.getEnchant().getName() + "!");
+                        return;
+                    }
+                }
+
                 manipulatorResultMessage.setText("Calculating...");
                 manipulatorFindEnchantButton.setEnabled(false);
 
-                HashMap<Integer, EnchantData> desiredEnchants = new HashMap<>();
-                for (Enchantment enchant : MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.keySet()) {
-                    JComponent[] components = MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.get(enchant);
-                    if (((JCheckBox)components[1]).isSelected()) {
-                        int level = Integer.parseInt((String)((JComboBox<String>)components[2]).getSelectedItem());
-                        desiredEnchants.put(enchant.getId(), new EnchantData(enchant, level));
-                        System.out.println("search for enchantment "+enchant.getName()+" @ level "+level);
-                    }
-                }
+                EnchantFinder finder = new EnchantFinder((String) manipulatorItemSelector.getSelectedItem(), (String) manipulatorMaterialSelector.getSelectedItem(), RNG_SEED, VERSION, BOOKSHELVES, MAX_ADVANCES, desiredEnchants, manipulatorExactly.isSelected(), ADVANCED_ADVANCES);
 
-                if (desiredEnchants.size() == 0) {
-                    manipulatorResultMessage.setText("No enchants selected!");
-                }
-                else {
-
-                    EnchantFinder finder = new EnchantFinder((String)manipulatorItemSelector.getSelectedItem(), (String)manipulatorMaterialSelector.getSelectedItem(), RNG_SEED, VERSION, BOOKSHELVES, MAX_ADVANCES, desiredEnchants, manipulatorExactly.isSelected(), ADVANCED_ADVANCES);
-                    THREAD_TASK = THREAD_POOL.submit(finder);
-                    while (!THREAD_TASK.isDone()) {
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
+                Thread waitThread = new Thread(() -> {
                     try {
-                        THREAD_TASK.get();
-
-                        if (finder.getFailed()) {
-                            throw new InterruptedException("Finder Failed");
-                        } else {
-                            if (ADVANCED_ADVANCES) {
-                                System.out.println(finder.getResultAdvances() + " raw advances required");
-                                int swapDifferent = (finder.getResultAdvances() / 3);
-                                int swap = 0;
-                                int shift = 0;
-                                if (finder.getResultAdvances() == 1) {
-                                    swap += 1;
-                                } else {
-                                    int mod = finder.getResultAdvances() % 3;
-                                    if (mod == 1) {
-                                        swapDifferent -= 1;
-                                        shift += 2;
-                                    } else if (mod == 2) {
-                                        shift += 1;
-                                    }
-                                }
-                                int outIn = swapDifferent % 2 == 1 ? 1 : 0;
-                                swapDifferent -= outIn;
-
-                                manipulatorResultMessage.setText("Swap Different: " + swapDifferent + ", Shift Remove + Insert: " + shift + ", Swap Same: " + swap + ", OutIn: " + outIn + ", Slot: " + (finder.getResultSlot() + 1) + " " + Arrays.toString(finder.getResultLevels()));
-                            }
-                            else {
-                                manipulatorResultMessage.setText("Advances: " + finder.getResultAdvances() + ", Slot: " + (finder.getResultSlot() + 1) + " " + Arrays.toString(finder.getResultLevels()));
-                            }
-                            POST_RNG_SEED = finder.getResultSeed();
-                            manipulatorFinalizeEnchantButton.setEnabled(true);
-                        }
-                        THREAD_TASK = null;
-                    } catch (ExecutionException | InterruptedException e) {
-                        if (finder.getResultAdvances() == -9001) {
-                            manipulatorResultMessage.setText("Failed to find enchant in "+ MAX_ADVANCES +" advances!");
-                        }
-                        else {
-                            System.out.println("Error searching!");
-                            e.printStackTrace();
-                            manipulatorResultMessage.setText("Error searching!");
-                        }
-
-                        THREAD_TASK = null;
+                        finder.run();
+                    } catch (Exception e) {
+                        System.out.println("Error searching for enchantments!");
+                        e.printStackTrace();
+                        manipulatorResultMessage.setText("Unknown error searching for enchantments! (See logs)");
                     }
-                }
-                manipulatorFindEnchantButton.setEnabled(true);
-            }
-            else {
-                manipulatorResultMessage.setText("Error! Already searching!");
+
+                    if (finder.getFailed()) {
+                        if (finder.getResultAdvances() == -9001) {
+                            manipulatorResultMessage.setText("Failed to find enchant in " + MAX_ADVANCES + " advances!");
+                        } else {
+                            manipulatorResultMessage.setText("Unknown error searching for enchantments!");
+                        }
+                    } else {
+                        if (ADVANCED_ADVANCES) {
+                            System.out.println(finder.getResultAdvances() + " raw advances required");
+                            int swapDifferent = (finder.getResultAdvances() / 3);
+                            int swap = 0;
+                            int shift = 0;
+                            if (finder.getResultAdvances() == 1) {
+                                swap += 1;
+                            } else {
+                                int mod = finder.getResultAdvances() % 3;
+                                if (mod == 1) {
+                                    swapDifferent -= 1;
+                                    shift += 2;
+                                } else if (mod == 2) {
+                                    shift += 1;
+                                }
+                            }
+                            int outIn = swapDifferent % 2 == 1 ? 1 : 0;
+                            swapDifferent -= outIn;
+
+                            manipulatorResultMessage.setText("Swap Different: " + swapDifferent + ", Shift Remove + Insert: " + shift + ", Swap Same: " + swap + ", OutIn: " + outIn + ", Slot: " + (finder.getResultSlot() + 1) + " " + Arrays.toString(finder.getResultLevels()));
+                        } else {
+                            manipulatorResultMessage.setText("Advances: " + finder.getResultAdvances() + ", Slot: " + (finder.getResultSlot() + 1) + " " + Arrays.toString(finder.getResultLevels()));
+                        }
+                        POST_RNG_SEED = finder.getResultSeed();
+                        manipulatorFinalizeEnchantButton.setEnabled(true);
+                    }
+
+                    manipulatorFindEnchantButton.setEnabled(true);
+                });
+
+                waitThread.start();
+
             }
         });
 
-        setupMaxAdvancesField.addKeyListener(new KeyAdapter() {
+        manipulatorMaxAdvancesField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                String s = setupMaxAdvancesField.getText();
+                String s = manipulatorMaxAdvancesField.getText();
                 if (s == null) {
                     s = "";
                 }
@@ -1225,10 +1217,10 @@ public class Main {
 
             @Override
             public void keyReleased(KeyEvent e) {
-                if (!setupMaxAdvancesField.isEditable()) {
+                if (!manipulatorMaxAdvancesField.isEditable()) {
                     return;
                 }
-                String text = setupMaxAdvancesField.getText();
+                String text = manipulatorMaxAdvancesField.getText();
                 if (text.length() == 0) {
                     manipulatorFindEnchantButton.setEnabled(false);
                     MAX_ADVANCES = -1;
@@ -1239,10 +1231,10 @@ public class Main {
                 }
             }
         });
-        setupMaxAdvancesField.setTransferHandler(null);
-        setupMaxAdvancesField.setText(String.valueOf(MAX_ADVANCES));
-        setPosition(setupMaxAdvancesField, 100, 99);
-        MANIPULATOR_PANEL.add(setupMaxAdvancesField);
+        manipulatorMaxAdvancesField.setTransferHandler(null);
+        manipulatorMaxAdvancesField.setText(String.valueOf(MAX_ADVANCES));
+        setPosition(manipulatorMaxAdvancesField, 100, 99);
+        MANIPULATOR_PANEL.add(manipulatorMaxAdvancesField);
 
         generateManipulatorEnchantmentSelector((String)manipulatorItemSelector.getSelectedItem());
     }

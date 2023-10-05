@@ -6,14 +6,11 @@ import com.terriblefriends.oldenchcracker.versions.Version;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Random;
 
-public class LevelCracker extends Thread {
+public class LevelCracker {
     private static final long randomMultiplier = 0x5DEECE66DL;
-    private static final long randomMultiplierInverse = 0xdfe05bcb1365L;
-    private static final long randomDelta = 0xbL;
-    private static final long randomMask = ((1L << 48)-1);
     private final int[][] levelData;
     private final Version version;
     private boolean failed = false;
@@ -25,9 +22,8 @@ public class LevelCracker extends Thread {
         this.version = version;
     }
 
-    @Override
     public void run() {
-        RandomReverser reverser = new RandomReverser(Collections.EMPTY_LIST);
+        RandomReverser reverser = new RandomReverser(new ArrayList<>(0));
 
         for (int[] cycle : levelData) {
             this.version.reverseLevels(reverser, cycle);

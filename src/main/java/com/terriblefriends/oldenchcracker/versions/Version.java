@@ -14,7 +14,7 @@ public interface Version {
     }
     default String[] getItemStrings() {
         return null;
-    };
+    }
     default String[] getMaterialStrings(String item) {
         return null;
     }
@@ -27,18 +27,17 @@ public interface Version {
     default int getMaxLevels() {
         return 0;
     }
+    default int getMaxEnchantability(int enchantability) {
+        return 0;
+    }
     default int getMaterialEnchantability(String material) {
         return 0;
     }
     default int[] getEnchantLevels(Random random, int books) {
         return null;
     }
-    default void reverseLevels(RandomReverser reverser, int[] cycle) {
-        return;
-    }
-    default void reverseExtremes(RandomReverser reverser, int advances, boolean isLow) {
-        return;
-    }
+    default void reverseLevels(RandomReverser reverser, int[] cycle) {}
+    default void reverseExtremes(RandomReverser reverser, int advances, boolean isLow) {}
     default int getExtremesNeeded() {
         return 0;
     }

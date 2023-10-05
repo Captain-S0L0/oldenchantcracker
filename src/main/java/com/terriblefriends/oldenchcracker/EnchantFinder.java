@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.*;
 
-public class EnchantFinder extends Thread {
+public class EnchantFinder {
     private static final long RANDOM_MULTIPLIER = 0x5DEECE66DL;
     private final int materialEnchantability;
     private final String item;
@@ -40,7 +40,6 @@ public class EnchantFinder extends Thread {
         this.advancedAdvancements = advancedAdvancements;
     }
 
-    @Override
     public void run() {
 
         //setup levels once first in case enchants are available on current selection

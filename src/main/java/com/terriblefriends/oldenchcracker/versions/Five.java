@@ -134,8 +134,6 @@ public class Five implements Version {
 
         switch (cycle[1]) {
             case 1:
-                secondMin = 0;
-                secondMax = 0;
                 break;
             case 2:
                 secondMin = 1;
@@ -164,6 +162,12 @@ public class Five implements Version {
 
         reverser.addNextIntCall(8, cycle[2]-1, cycle[2]-1);
         reverser.consumeNextIntCalls(1, 1);
+    }
+
+    @Override
+    public int getMaxEnchantability(int enchantability) {
+        enchantability /= 2;
+        return Math.max((int)((float)(1 + ((enchantability >> 1) * 2) + this.getMaxLevels()) * 1.15F + 0.5F), 1);
     }
 
     @Override
