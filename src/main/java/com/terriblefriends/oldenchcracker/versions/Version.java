@@ -27,7 +27,7 @@ public interface Version {
     default int getMaxLevels() {
         return 0;
     }
-    default int getMaxEnchantability(int enchantability) {
+    default int getMaxEnchantability(int enchantability, int level) {
         return 0;
     }
     default int getMaterialEnchantability(String material) {

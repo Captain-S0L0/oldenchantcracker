@@ -41,6 +41,7 @@ public class GalacticCracker {
                 reverser.addNextIntCall(WORD_LIST_LENGTH, words[slot][3], words[slot][3]);
             }
         }
+
         long[] seeds = reverser.findAllValidSeeds().toArray();
         if (seeds.length > 1) {
             System.out.println("ERROR! Found more than 1 valid seed!");
@@ -57,16 +58,15 @@ public class GalacticCracker {
 
         long wordSeed = seeds[0] ^ RANDOM_MULTIPLIER;
 
-        List<Long> sixtyFourSeeds = new ArrayList<>();
+        List<Long> longSeeds = new ArrayList<>();
 
-        for (long sixteenbits = 0; sixteenbits < 65536; sixteenbits++) { //this is probably horrible, but it runs fast enough and I don't fucking care anymore
-            long sixtyfourbits = (sixteenbits << 48) + wordSeed;
-            long sixtyfourbitsSeed = 0;
-            boolean failed = true;
+        // normally, you can crack the seed of a random from the result of a nextLong() call, but we don't have the top 16 bits of that call so we brute force those
+        for (long topbits = 0; topbits < 65536; topbits++) {
+            long longToTest = (topbits << 48) + wordSeed;
 
             //THX https://stackoverflow.com/a/15237585
-            long a = sixtyfourbits >>> 32;
-            long b = sixtyfourbits & ((1L<<32)-1);
+            long a = longToTest >>> 32;
+            long b = longToTest & ((1L<<32)-1);
             if((b & 0x80000000) != 0)
                 a++;
             long q = ((b << 16) - RANDOM_DELTA - (a << 16)* RANDOM_MULTIPLIER) & RANDOM_MASK;
@@ -76,42 +76,36 @@ public class GalacticCracker {
                 if(d < 65536) {
                     long c = ((q + d) * RANDOM_MULTIPLIER_INVERSE) & RANDOM_MASK;
                     if(c < 65536) {
-                        sixtyfourbitsSeed = ((((a << 16) + c) - RANDOM_DELTA) * RANDOM_MULTIPLIER_INVERSE) & RANDOM_MASK;
-                        failed = false;
-                        break;
+                        long longSeed = ((((a << 16) + c) - RANDOM_DELTA) * RANDOM_MULTIPLIER_INVERSE) & RANDOM_MASK;
+
+                        //we don't need the levels to crack the RNG directly, but as 2 64 bit longs could be valid for a 48 bit seed, need this extra check
+                        Random sixteenCrack = new Random((longSeed ^ RANDOM_MULTIPLIER) & RANDOM_MASK);
+                        sixteenCrack.nextLong();
+
+                        int[] levels = version.getEnchantLevels(sixteenCrack, books);
+                        if (levels[0] == this.levels[0] && levels[1] == this.levels[1] && levels[2] == this.levels[2]) {
+                            longSeeds.add(longSeed);
+                        }
                     }
                 }
             }
-            if (failed) {
-                //System.out.println("ERROR attempting long "+sixtyfourbits);
-                continue;
-            }
             //END "BORROWED" CODE
-
-            //we don't need the levels to crack the RNG directly, but as 2 64 bit longs could be valid for a 48 bit seed, need this extra check
-            Random sixteenCrack = new Random((sixtyfourbitsSeed^ RANDOM_MULTIPLIER) & RANDOM_MASK);
-            sixteenCrack.nextLong();
-
-            int[] levels = version.getEnchantLevels(sixteenCrack, books);
-            if (levels[0] == this.levels[0] && levels[1] == this.levels[1] && levels[2] == this.levels[2]) {
-                sixtyFourSeeds.add(sixtyfourbitsSeed);
-            }
         }
 
-        if (sixtyFourSeeds.size() > 1) {
-            System.out.println("ERROR! Found more than 1 64 bit seed!");
-            for (long l : sixtyFourSeeds) {
+        if (longSeeds.size() > 1) {
+            System.out.println("ERROR! Found more than 1 valid seed!");
+            for (long l : longSeeds) {
                 System.out.println(l+"L");
             }
             System.out.println("Using the 1st and hoping everything's alright...");
-            this.result = sixtyFourSeeds.get(0);
+            this.result = longSeeds.get(0);
         }
-        else if (sixtyFourSeeds.size() == 0) {
+        else if (longSeeds.size() == 0) {
             this.failed = true;
-            System.out.println("ERROR! Failed to find valid 64 bit seed!");
+            System.out.println("ERROR! Failed to find valid long seed!");
         }
         else {
-            this.result = sixtyFourSeeds.get(0);
+            this.result = longSeeds.get(0);
         }
     }
 

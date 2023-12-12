@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
+import java.util.List;
 
 public class Main {
 
@@ -1102,12 +1103,12 @@ public class Main {
                 return;
             }
 
-            HashMap<Integer, EnchantData> desiredEnchants = new HashMap<>();
+            List<EnchantData> desiredEnchants = new ArrayList<>();
             for (Enchantment enchant : MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.keySet()) {
                 JComponent[] components = MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.get(enchant);
                 if (((JCheckBox) components[1]).isSelected()) {
                     int level = Integer.parseInt((String) Objects.requireNonNull(((JComboBox<?>) components[2]).getSelectedItem()));
-                    desiredEnchants.put(enchant.getId(), new EnchantData(enchant, level));
+                    desiredEnchants.add(new EnchantData(enchant, level));
                     System.out.println("search for enchantment " + enchant.getName() + " @ level " + level);
                 }
             }
@@ -1115,24 +1116,22 @@ public class Main {
             if (desiredEnchants.size() == 0) {
                 manipulatorResultMessage.setText("No enchants selected!");
             } else {
-                Collection<EnchantData> enchantData = desiredEnchants.values();
-
                 if (Objects.equals(manipulatorMaterialSelector.getSelectedItem(), "Book") && !(VERSION instanceof Nine) && desiredEnchants.size() > 1) {
                     manipulatorResultMessage.setText("More than 1 book enchantment selected!");
                     return;
                 }
 
-                for (EnchantData data : enchantData) {
-                    Set<Integer> copyIds = new HashSet<>(desiredEnchants.keySet());
-                    copyIds.remove(data.getEnchant().getId());
-                    for (int id : copyIds) {
-                        if (!data.getEnchant().isCompatibleEnchant(id)) {
+                for (EnchantData data : desiredEnchants) {
+                    List<EnchantData> copyData = new ArrayList<>(desiredEnchants);
+                    copyData.remove(data);
+                    for (EnchantData d2 : copyData) {
+                        if (!data.getEnchant().isCompatibleEnchant(d2.getEnchant().getId())) {
                             manipulatorResultMessage.setText("Conflicting enchantments selected!");
                             return;
                         }
                     }
 
-                    if (VERSION.getMaxEnchantability(VERSION.getMaterialEnchantability((String) manipulatorMaterialSelector.getSelectedItem())) < data.getEnchant().getMinEnchantability(data.getLevel())) {
+                    if (VERSION.getMaxEnchantability(VERSION.getMaterialEnchantability((String) manipulatorMaterialSelector.getSelectedItem()), VERSION.getMaxLevels()) < data.getEnchant().getMinEnchantability(data.getLevel())) {
                         manipulatorResultMessage.setText("Impossible enchantment level selected for " + data.getEnchant().getName() + "!");
                         return;
                     }
@@ -1140,6 +1139,19 @@ public class Main {
 
                 manipulatorResultMessage.setText("Calculating...");
                 manipulatorFindEnchantButton.setEnabled(false);
+                manipulatorMaxAdvancesField.setEditable(false);
+                manipulatorExactly.setEnabled(false);
+                manipulatorConsiderAllCalls.setEnabled(false);
+                manipulatorItemSelector.setEnabled(false);
+                manipulatorMaterialSelector.setEnabled(false);
+
+                for (JComponent[] components : MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.values()) {
+                    for (JComponent component : components) {
+                        if (component instanceof JCheckBox || component instanceof JComboBox) {
+                            component.setEnabled(false);
+                        }
+                    }
+                }
 
                 EnchantFinder finder = new EnchantFinder((String) manipulatorItemSelector.getSelectedItem(), (String) manipulatorMaterialSelector.getSelectedItem(), RNG_SEED, VERSION, BOOKSHELVES, MAX_ADVANCES, desiredEnchants, manipulatorExactly.isSelected(), ADVANCED_ADVANCES);
 
@@ -1187,6 +1199,19 @@ public class Main {
                     }
 
                     manipulatorFindEnchantButton.setEnabled(true);
+                    manipulatorMaxAdvancesField.setEditable(true);
+                    manipulatorExactly.setEnabled(true);
+                    manipulatorConsiderAllCalls.setEnabled(true);
+                    manipulatorItemSelector.setEnabled(true);
+                    manipulatorMaterialSelector.setEnabled(true);
+
+                    for (JComponent[] components : MANIPULATOR_ENCHANTMENT_SELECTOR_COMPONENTS.values()) {
+                        for (JComponent component : components) {
+                            if (component instanceof JCheckBox || component instanceof JComboBox) {
+                                component.setEnabled(true);
+                            }
+                        }
+                    }
                 });
 
                 waitThread.start();

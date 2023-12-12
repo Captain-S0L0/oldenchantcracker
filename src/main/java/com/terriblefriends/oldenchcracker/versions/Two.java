@@ -144,8 +144,8 @@ public class Two implements Version {
     }
 
     @Override
-    public int getMaxEnchantability(int enchantability) {
-        return (int)((float)(1 + ((enchantability >> 1) * 2) + this.getMaxLevels()) * 1.25F + 0.5F);
+    public int getMaxEnchantability(int enchantability, int level) {
+        return (int)((float)(1 + ((enchantability >> 1) * 2) + level) * 1.25F + 0.5F);
     }
 
     @Override

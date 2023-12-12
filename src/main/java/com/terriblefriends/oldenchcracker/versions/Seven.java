@@ -168,9 +168,9 @@ public class Seven implements Version {
     }
 
     @Override
-    public int getMaxEnchantability(int enchantability) {
+    public int getMaxEnchantability(int enchantability, int level) {
         enchantability /= 2;
-        return Math.max((int)((float)(1 + ((enchantability >> 1) * 2) + this.getMaxLevels()) * 1.15F + 0.5F), 1);
+        return Math.max((int)((float)(1 + ((enchantability >> 1) * 2) + level) * 1.15F + 0.5F), 1);
     }
 
     @Override
