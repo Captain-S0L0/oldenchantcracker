@@ -1,6 +1,4 @@
-package com.terriblefriends.oldenchcracker;
-
-import com.terriblefriends.oldenchcracker.thingmanagers.Enchantment;
+package com.terriblefriends.oldenchcracker.thingmanager;
 
 public class EnchantData {
 
@@ -14,6 +12,10 @@ public class EnchantData {
 
     public int getLevel() {
         return this.level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 
     public Enchantment getEnchant() {

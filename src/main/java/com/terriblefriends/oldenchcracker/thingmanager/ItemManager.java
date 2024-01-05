@@ -1,16 +1,19 @@
-package com.terriblefriends.oldenchcracker.thingmanagers;
+package com.terriblefriends.oldenchcracker.thingmanager;
 
-import java.util.HashMap;
+import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
+
+import java.util.LinkedHashMap;
 
 public class ItemManager {
-    private final HashMap<String, Item> items = new HashMap<>();
+    private final LinkedHashMap<String, Item> items = new LinkedHashMap<>();
+
 
     public void register(String name, int[] validMaterials, int[] validEnchants) {
         if (!items.containsKey(name)) {
             items.put(name, new Item(validMaterials, validEnchants));
         }
         else {
-            throw new RuntimeException("Duplicate Item ID: "+name+"!");
+            throw new RuntimeException(String.format(EnchantCrackerI18n.translate("item.error.duplicate"), name));
         }
     }
 

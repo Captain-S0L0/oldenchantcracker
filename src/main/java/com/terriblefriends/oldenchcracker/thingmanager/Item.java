@@ -1,4 +1,4 @@
-package com.terriblefriends.oldenchcracker.thingmanagers;
+package com.terriblefriends.oldenchcracker.thingmanager;
 
 public class Item {
     private final int[] validEnchants;

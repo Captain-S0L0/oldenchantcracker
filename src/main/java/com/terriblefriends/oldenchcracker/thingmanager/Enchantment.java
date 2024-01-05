@@ -1,4 +1,4 @@
-package com.terriblefriends.oldenchcracker.thingmanagers;
+package com.terriblefriends.oldenchcracker.thingmanager;
 
 import java.util.function.Function;
 

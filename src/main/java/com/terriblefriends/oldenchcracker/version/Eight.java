@@ -1,64 +1,69 @@
-package com.terriblefriends.oldenchcracker.versions;
+package com.terriblefriends.oldenchcracker.version;
 
 import com.seedfinding.latticg.RandomReverser;
-import com.terriblefriends.oldenchcracker.EnchantData;
-import com.terriblefriends.oldenchcracker.thingmanagers.*;
+import com.terriblefriends.oldenchcracker.thingmanager.EnchantData;
+import com.terriblefriends.oldenchcracker.thingmanager.*;
 
 import java.util.*;
 
-public class Six implements Version {
-    //Tools for Minecraft version 12w49a
+public class Eight implements Version {
+    //Tools for Minecraft versions 13w36a (1.7) to 13w36b (1.7)
 
     private static final EnchantmentManager ENCHANTMENT_MANAGER = new EnchantmentManager();
     private static final ItemManager ITEM_MANAGER = new ItemManager();
     private static final MaterialManager MATERIAL_MANAGER = new MaterialManager();
 
     static {
-        ENCHANTMENT_MANAGER.register("Protection", 0, 10, 4, l -> 1 + (l - 1) * 11, l -> (1 + (l - 1) * 11) + 20, new int[]{1, 3, 4});
-        ENCHANTMENT_MANAGER.register("Fire Protection", 1, 5, 4, l -> 10 + (l - 1) * 8, l -> (10 + (l - 1) * 8) + 12, new int[]{0, 3, 4});
-        ENCHANTMENT_MANAGER.register("Feather Falling", 2, 5, 4, l -> 5 + (l - 1) * 6, l -> (5 + (l - 1) * 6) + 10, null);
-        ENCHANTMENT_MANAGER.register("Blast Protection", 3, 2, 4, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 12, new int[]{0, 1, 4});
-        ENCHANTMENT_MANAGER.register("Projectile Protection", 4, 5, 4, l -> 3 + (l - 1) * 6, l -> (3 + (l - 1) * 6) + 15, new int[]{0, 1, 3});
-        ENCHANTMENT_MANAGER.register("Respiration", 5, 2, 3, l -> 10 * l, l -> (10 * l) + 30, null);
-        ENCHANTMENT_MANAGER.register("Aqua Affinity", 6, 2, 1, l -> 1, l -> 41, null);
-        ENCHANTMENT_MANAGER.register("Sharpness", 16, 10, 5, l -> 1 + (l - 1) * 11, l -> (1 + (l - 1) * 11) + 20, new int[]{17, 18});
-        ENCHANTMENT_MANAGER.register("Smite", 17, 5, 5, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 20, new int[]{16, 18});
-        ENCHANTMENT_MANAGER.register("Bane of Arthropods", 18, 5, 5, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 20, new int[]{16, 17});
-        ENCHANTMENT_MANAGER.register("Knockback", 19, 5, 2, l -> 5 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("Fire Aspect", 20, 2, 2, l -> 10 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("Looting", 21, 2, 3, l -> 15 + (l - 1) * 9, l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("Efficiency", 32, 10, 5, l -> 1 + 10 * (l - 1), l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("Silk Touch", 33, 1, 1, l -> 15, l -> (1 + l * 10) + 50, new int[]{35});
-        ENCHANTMENT_MANAGER.register("Unbreaking", 34, 5, 3, l -> 5 + (l - 1) * 8, l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("Fortune", 35, 2, 3, l -> 15 + (l - 1) * 9, l -> (1 + l * 10) + 50, new int[]{33});
-        ENCHANTMENT_MANAGER.register("Power", 48, 10, 5, l -> 1 + (l - 1) * 10, l -> (1 + (l - 1) * 10) + 15, null);
-        ENCHANTMENT_MANAGER.register("Punch", 49, 2, 2, l -> 12 + (l - 1) * 20, l -> (12 + (l - 1) * 20) + 25, null);
-        ENCHANTMENT_MANAGER.register("Flame", 50, 2, 1, l -> 20, l -> 50, null);
-        ENCHANTMENT_MANAGER.register("Infinity", 51, 1, 1, l -> 20, l -> 50, null);
+        ENCHANTMENT_MANAGER.register("enchantment.protection", 0, 10, 4, l -> 1 + (l - 1) * 11, l -> (1 + (l - 1) * 11) + 20, new int[]{1, 3, 4});
+        ENCHANTMENT_MANAGER.register("enchantment.fire_protection", 1, 5, 4, l -> 10 + (l - 1) * 8, l -> (10 + (l - 1) * 8) + 12, new int[]{0, 3, 4});
+        ENCHANTMENT_MANAGER.register("enchantment.feather_falling", 2, 5, 4, l -> 5 + (l - 1) * 6, l -> (5 + (l - 1) * 6) + 10, null);
+        ENCHANTMENT_MANAGER.register("enchantment.blast_protection", 3, 2, 4, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 12, new int[]{0, 1, 4});
+        ENCHANTMENT_MANAGER.register("enchantment.projectile_protection", 4, 5, 4, l -> 3 + (l - 1) * 6, l -> (3 + (l - 1) * 6) + 15, new int[]{0, 1, 3});
+        ENCHANTMENT_MANAGER.register("enchantment.respiration", 5, 2, 3, l -> 10 * l, l -> (10 * l) + 30, null);
+        ENCHANTMENT_MANAGER.register("enchantment.aqua_affinity", 6, 2, 1, l -> 1, l -> 41, null);
+        ENCHANTMENT_MANAGER.register("enchantment.thorns", 7, 1, 3, l -> 10 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
+        ENCHANTMENT_MANAGER.register("enchantment.sharpness", 16, 10, 5, l -> 1 + (l - 1) * 11, l -> (1 + (l - 1) * 11) + 20, new int[]{17, 18});
+        ENCHANTMENT_MANAGER.register("enchantment.smite", 17, 5, 5, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 20, new int[]{16, 18});
+        ENCHANTMENT_MANAGER.register("enchantment.bane_of_arthropods", 18, 5, 5, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 20, new int[]{16, 17});
+        ENCHANTMENT_MANAGER.register("enchantment.knockback", 19, 5, 2, l -> 5 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
+        ENCHANTMENT_MANAGER.register("enchantment.fire_aspect", 20, 2, 2, l -> 10 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
+        ENCHANTMENT_MANAGER.register("enchantment.looting", 21, 2, 3, l -> 15 + (l - 1) * 9, l -> (1 + l * 10) + 50, null);
+        ENCHANTMENT_MANAGER.register("enchantment.efficiency", 32, 10, 5, l -> 1 + 10 * (l - 1), l -> (1 + l * 10) + 50, null);
+        ENCHANTMENT_MANAGER.register("enchantment.silk_touch", 33, 1, 1, l -> 15, l -> (1 + l * 10) + 50, new int[]{35});
+        ENCHANTMENT_MANAGER.register("enchantment.unbreaking", 34, 5, 3, l -> 5 + (l - 1) * 8, l -> (1 + l * 10) + 50, null);
+        ENCHANTMENT_MANAGER.register("enchantment.fortune", 35, 2, 3, l -> 15 + (l - 1) * 9, l -> (1 + l * 10) + 50, new int[]{33});
+        ENCHANTMENT_MANAGER.register("enchantment.power", 48, 10, 5, l -> 1 + (l - 1) * 10, l -> (1 + (l - 1) * 10) + 15, null);
+        ENCHANTMENT_MANAGER.register("enchantment.punch", 49, 2, 2, l -> 12 + (l - 1) * 20, l -> (12 + (l - 1) * 20) + 25, null);
+        ENCHANTMENT_MANAGER.register("enchantment.flame", 50, 2, 1, l -> 20, l -> 50, null);
+        ENCHANTMENT_MANAGER.register("enchantment.infinity", 51, 1, 1, l -> 20, l -> 50, null);
+        ENCHANTMENT_MANAGER.register("enchantment.luck_of_the_sea", 61, 2, 3, l -> 15 + (l - 1) * 9, l -> (1 + l * 10) + 50, new int[]{35});
+        ENCHANTMENT_MANAGER.register("enchantment.lure", 62, 2, 3, l -> 15 + (l - 1) * 9, l -> (1 + l * 10) + 50, null);
 
-        ITEM_MANAGER.register("Helmet", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 5, 6});
-        ITEM_MANAGER.register("Chestplate", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4});
-        ITEM_MANAGER.register("Leggings", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4});
-        ITEM_MANAGER.register("Boots", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 2, 3, 4});
-        ITEM_MANAGER.register("Sword", new int[]{0, 1, 2, 3, 4}, new int[]{16, 17, 18, 19, 20, 21});
-        ITEM_MANAGER.register("Pickaxe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
-        ITEM_MANAGER.register("Axe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
-        ITEM_MANAGER.register("Shovel", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
-        ITEM_MANAGER.register("Bow", new int[]{10}, new int[]{48, 49, 50, 51});
-        ITEM_MANAGER.register("Book", new int[]{11}, new int[]{0, 1, 2, 3, 4, 5, 6, 16, 17, 18, 19, 20, 21, 32, 33, 34, 35, 48, 49, 50, 51});
+        ITEM_MANAGER.register("item.helmet", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 5, 6, 34});
+        ITEM_MANAGER.register("item.chestplate", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 7, 34});
+        ITEM_MANAGER.register("item.leggings", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 34});
+        ITEM_MANAGER.register("item.boots", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 2, 3, 4, 34});
+        ITEM_MANAGER.register("item.sword", new int[]{0, 1, 2, 3, 4}, new int[]{16, 17, 18, 19, 20, 21, 34});
+        ITEM_MANAGER.register("item.pickaxe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
+        ITEM_MANAGER.register("item.axe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
+        ITEM_MANAGER.register("item.shovel", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
+        ITEM_MANAGER.register("item.bow", new int[]{10}, new int[]{34, 48, 49, 50, 51});
+        ITEM_MANAGER.register("item.book", new int[]{11}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 32, 33, 34, 35, 48, 49, 50, 51, 61, 62});
+        ITEM_MANAGER.register("item.fishing_rod", new int[]{12}, new int[]{34, 61, 62});
 
-        MATERIAL_MANAGER.register(0, "ToolWood", 15);
-        MATERIAL_MANAGER.register(1, "ToolStone", 5);
-        MATERIAL_MANAGER.register(2, "ToolIron", 14);
-        MATERIAL_MANAGER.register(3, "ToolDiamond", 10);
-        MATERIAL_MANAGER.register(4, "ToolGold", 22);
-        MATERIAL_MANAGER.register(5, "ArmorLeather", 15);
-        MATERIAL_MANAGER.register(6, "ArmorChain", 12);
-        MATERIAL_MANAGER.register(7, "ArmorIron", 9);
-        MATERIAL_MANAGER.register(8, "ArmorDiamond", 10);
-        MATERIAL_MANAGER.register(9, "ArmorGold", 25);
-        MATERIAL_MANAGER.register(10, "Bow", 1);
-        MATERIAL_MANAGER.register(11, "Book", 1);
+        MATERIAL_MANAGER.register(0, "material.tool.wood", 15);
+        MATERIAL_MANAGER.register(1, "material.tool.stone", 5);
+        MATERIAL_MANAGER.register(2, "material.tool.iron", 14);
+        MATERIAL_MANAGER.register(3, "material.tool.diamond", 10);
+        MATERIAL_MANAGER.register(4, "material.tool.gold", 22);
+        MATERIAL_MANAGER.register(5, "material.armor.leather", 15);
+        MATERIAL_MANAGER.register(6, "material.armor.chainmail", 12);
+        MATERIAL_MANAGER.register(7, "material.armor.iron", 9);
+        MATERIAL_MANAGER.register(8, "material.armor.diamond", 10);
+        MATERIAL_MANAGER.register(9, "material.armor.gold", 25);
+        MATERIAL_MANAGER.register(10, "material.bow", 1);
+        MATERIAL_MANAGER.register(11, "material.book", 1);
+        MATERIAL_MANAGER.register(12, "material.fishing_rod", 1);
     }
 
     @Override
@@ -234,8 +239,7 @@ public class Six implements Version {
             }
         }
 
-        if (item.equals("Book")) {
-            assert enchantmentsFinal != null;
+        if (item.equals("item.book") && enchantmentsFinal != null) {
             EnchantData bookEnchant = enchantmentsFinal.get(random.nextInt(enchantmentsFinal.size()));
             enchantmentsFinal.clear();
             enchantmentsFinal.add(bookEnchant);

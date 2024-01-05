@@ -1,9 +1,9 @@
-package com.terriblefriends.oldenchcracker.versions;
+package com.terriblefriends.oldenchcracker.version;
 
 import com.seedfinding.latticg.RandomReverser;
-import com.terriblefriends.oldenchcracker.EnchantData;
-import com.terriblefriends.oldenchcracker.thingmanagers.Enchantment;
-import com.terriblefriends.oldenchcracker.thingmanagers.Item;
+import com.terriblefriends.oldenchcracker.thingmanager.EnchantData;
+import com.terriblefriends.oldenchcracker.thingmanager.Enchantment;
+import com.terriblefriends.oldenchcracker.thingmanager.Item;
 
 import java.util.List;
 import java.util.Random;

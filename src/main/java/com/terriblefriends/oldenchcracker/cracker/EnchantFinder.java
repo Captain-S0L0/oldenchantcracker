@@ -1,6 +1,9 @@
-package com.terriblefriends.oldenchcracker;
+package com.terriblefriends.oldenchcracker.cracker;
 
-import com.terriblefriends.oldenchcracker.versions.Version;
+import com.terriblefriends.oldenchcracker.EnchantCracker;
+import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
+import com.terriblefriends.oldenchcracker.thingmanager.EnchantData;
+import com.terriblefriends.oldenchcracker.version.Version;
 
 import java.util.*;
 
@@ -14,17 +17,14 @@ public class EnchantFinder {
     private final boolean exactly;
     private final int maxAdvances;
     private final boolean advancedAdvancements;
-    private int resultAdvances = -1;
-    private int resultSlot = -1;
-    private long resultSeed = -1;
+    private int resultAdvances = EnchantCracker.FINDER_RESULT_UNSET;
+    private int resultSlot = EnchantCracker.FINDER_RESULT_UNSET;
+    private long resultSeed = EnchantCracker.FINDER_RESULT_UNSET;
     private int[] resultLevels = new int[0];
     private boolean failed = false;
 
     public EnchantFinder(String item, String material, long randomSeed, Version version, int books, int maxAdvances, List<EnchantData> desiredEnchants, boolean exactly, boolean advancedAdvancements) {
         this.materialEnchantability = version.getMaterialEnchantability(material);
-        if (this.materialEnchantability == -1) {
-            throw new RuntimeException("ERROR! Invalid material!");
-        }
         this.item = item;
         this.random = new ReadableRandom(randomSeed);
         this.random.nextLong();
@@ -37,11 +37,8 @@ public class EnchantFinder {
     }
 
     public void run() {
-
         //setup levels once first in case enchants are available on current selection
         int[] levels = this.version.getEnchantLevels(this.random, this.books);
-
-        //System.out.println(levels[0]+","+levels[1]+","+levels[2]);
 
         //precalculate max enchantabilities and required enchantability for performance
         int[] maxEnchantabilities = new int[this.version.getMaxLevels()+1];
@@ -60,16 +57,11 @@ public class EnchantFinder {
         for (int advances = 0; advances < this.maxAdvances; advances++) {
             long slotResetSeed = this.random.getSeed();
 
-            //System.out.println();
-            //System.out.println("advance "+advances);
-            //System.out.println("stored seed "+slotResetSeed);
-
             for (int slot = 0; slot < 3; slot++) {
 
                 //if our enchantments aren't possible at the given level, skip looking
                 if (maxEnchantabilities[levels[slot]] >= requiredEnchantability) {
 
-                    //System.out.println("slot "+slot);
                     List<EnchantData> enchantList = this.version.getItemEnchantments(this.random, this.materialEnchantability, this.item, levels[slot]);
 
                     if (enchantList != null) {
@@ -114,7 +106,8 @@ public class EnchantFinder {
 
                         if (valid) {
                             for (EnchantData data : enchantList) {
-                                System.out.println("Found enchantment "+data.getEnchant().getName()+" @ level "+data.getLevel());
+                                System.out.printf(EnchantCrackerI18n.translate("manipulator.found.enchantment"), EnchantCrackerI18n.translate(data.getEnchant().getName()), data.getLevel());
+                                System.out.println();
                             }
 
                             this.resultLevels = levels;
@@ -122,10 +115,12 @@ public class EnchantFinder {
                             this.resultSlot = slot;
 
                             if (this.version.getCrackType() == Version.CrackType.LEVELS) {
-                                this.random.nextLong();//Do this twice because 1.3+ changed advances slightly
+                                //Do this twice because 1.3+ changed advances slightly
+                                this.random.nextLong();
                                 this.version.getEnchantLevels(this.random, this.books);
                             }
-                            this.random.nextLong();//DON'T DO THIS TWICE BECAUSE WE DO IT AGAIN TO START THE NEXT SEARCH
+                            //DON'T DO THIS TWICE BECAUSE WE DO IT AGAIN TO START THE NEXT SEARCH
+                            this.random.nextLong();
                             this.version.getEnchantLevels(this.random, this.books);
 
                             this.resultSeed = this.random.getSeed();
@@ -134,7 +129,6 @@ public class EnchantFinder {
                     }
                 }
                 this.random.setRSeed(slotResetSeed);
-                //System.out.println("set seed "+(slotResetSeed ^ randomMultiplier));
             }
 
             // the default advancement mode actually advances 3 times per, advanced checks everything
@@ -142,10 +136,10 @@ public class EnchantFinder {
                 this.random.nextLong();
                 levels = this.version.getEnchantLevels(this.random, this.books);
             }
-            //System.out.println(levels[0]+","+levels[1]+","+levels[2]);
         }
-        System.out.println("Failed to find enchant in "+this.maxAdvances+" advances!");
-        this.resultAdvances = -9001;
+        System.out.printf(EnchantCrackerI18n.translate("manipulator.error.notfound"), this.maxAdvances);
+        System.out.println();
+        this.resultAdvances = EnchantCracker.FINDER_RESULT_NOTFOUND;
         this.failed = true;
     }
 

@@ -1,4 +1,4 @@
-package com.terriblefriends.oldenchcracker;
+package com.terriblefriends.oldenchcracker.cracker;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -25,7 +25,7 @@ public class ReadableRandom extends Random {
         return (int)(nextseed >>> (48 - bits));
     }
 
-    long getSeed() {
+    public long getSeed() {
         return this.readableSeed.get();
     }
 

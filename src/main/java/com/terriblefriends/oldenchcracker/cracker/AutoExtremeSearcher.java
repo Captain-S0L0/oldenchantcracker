@@ -1,10 +1,11 @@
-package com.terriblefriends.oldenchcracker;
+package com.terriblefriends.oldenchcracker.cracker;
 
 import com.github.kwhat.jnativehook.GlobalScreen;
 import com.github.kwhat.jnativehook.NativeHookException;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
-import com.terriblefriends.oldenchcracker.versions.Version;
+import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
+import com.terriblefriends.oldenchcracker.version.Version;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +20,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class AutoExtremeSearcher implements NativeKeyListener {
-    private static Robot ROBOT;
 
     private static final boolean[] ONE = new boolean[]{
             false, false, true, false, false,
@@ -51,56 +51,80 @@ public class AutoExtremeSearcher implements NativeKeyListener {
             false, true, true, true, false
     };
 
-    static {
+    private Robot ROBOT;
+    private int delay;
+    private int extremesNeeded;
+    private JTextField[] advancesTextFields;
+    private JCheckBox[] isLowCheckBoxes;
+    private JButton crackButton;
+    private JButton setupButton;
+    private boolean windowsMode;
+    private int x;
+    private int y;
+    private JLabel resultMessage;
+    private int screenshotAttempts;
+    private boolean testMode;
+
+    private boolean initialized;
+    private boolean setup;
+    private boolean hasStarted;
+    private boolean paused;
+    private boolean hasFoundAnything;
+    private Thread cycleThread;
+
+    public void init() {
+        boolean errored = false;
         try {
             ROBOT = new Robot();
         }
-        catch (AWTException | SecurityException e) {
-            e.printStackTrace();
-            throw new RuntimeException("failed to create robot!");
+        catch (AWTException | SecurityException ex) {
+            ex.printStackTrace(System.err);
+            errored = true;
         }
 
         try {
             GlobalScreen.registerNativeHook();
         }
         catch (NativeHookException ex) {
-            System.err.println(ex.getMessage());
-            throw new RuntimeException("failed to create native hook!");
+            ex.printStackTrace(System.err);
+            errored = true;
+        }
+        this.initialized = !errored;
+    }
+
+    public void close() {
+        try {
+            GlobalScreen.unregisterNativeHook();
+        }
+        catch (NativeHookException ignored) {
+
         }
     }
 
-    private final Version version;
-    private final int delay;
-    private final int extremesNeeded;
-    private final JTextField[] advancesTextFields;
-    private final JCheckBox[] isLowCheckBoxes;
-    private final JButton crackButton;
-    private final boolean windowsMode;
-    private final int x;
-    private final int y;
-    private final JLabel resultMessage;
-    private final int screenshotAttempts;
-    private final boolean testMode;
+    public boolean getInitialized() {
+        return this.initialized;
+    }
 
-    private boolean hasStarted = false;
-    private boolean paused = false;
-    private boolean hasFoundAnything = false;
-
-    public AutoExtremeSearcher(Version version, int delay, int x, int y, boolean windowsMode, int screenshotAttempts, boolean testMode, JTextField[] advancesTextFields, JCheckBox[] isLowCheckBoxes, JButton crackButton, JLabel resultMessage) {
+    public void setup(Version version, int delay, int x, int y, boolean windowsMode, int screenshotAttempts, boolean testMode, JTextField[] advancesTextFields, JCheckBox[] isLowCheckBoxes, JButton crackButton, JButton setupButton, JLabel resultMessage) {
         this.extremesNeeded = version.getExtremesNeeded();
-        this.version = version;
         this.delay = delay;
         this.advancesTextFields = advancesTextFields;
         this.isLowCheckBoxes = isLowCheckBoxes;
         this.crackButton = crackButton;
+        this.setupButton = setupButton;
         this.windowsMode = windowsMode;
         this.x = x;
         this.y = y;
         this.resultMessage = resultMessage;
         this.screenshotAttempts = screenshotAttempts;
         this.testMode = testMode;
+        this.hasStarted = false;
+        this.paused = false;
+        this.hasFoundAnything = false;
 
         GlobalScreen.addNativeKeyListener(this);
+
+        this.setup = true;
     }
 
     @Override
@@ -110,7 +134,7 @@ public class AutoExtremeSearcher implements NativeKeyListener {
         if (!this.paused && keyEvent.getKeyCode() == NativeKeyEvent.VC_F4) {
             if (!this.hasStarted) {
                 this.hasStarted = true;
-                Thread cycleThread = new Thread(() -> {
+                this.cycleThread = new Thread(() -> {
                     try {
                         int cycles = 0;
                         int collected = 0;
@@ -134,7 +158,7 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                             }
 
                             if (this.windowsMode && (bufferedImage.getWidth() != 856 || bufferedImage.getHeight() != 512)) {
-                                this.exit("Error! Window not correct size (856x512)!");
+                                this.exit(EnchantCrackerI18n.translate("panel.extremes.search.error.windowsize"));
                                 return;
                             }
 
@@ -176,7 +200,7 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                             boolean singleDigit = true;
 
                             if (!this.hasFoundAnything && !foundAnything) {
-                                this.exit("Error! Failed to find pixels! (GUI isn't 2, X & Y wrong, or delay too low)");
+                                this.exit(EnchantCrackerI18n.translate("panel.extremes.search.error.nopixels"));
                                 return;
                             }
                             else {
@@ -193,7 +217,7 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                                 }
 
                                 if (this.testMode && Arrays.equals(digitOne, FIVE)) {
-                                    this.exit("Auto Searcher test success!");
+                                    this.exit(EnchantCrackerI18n.translate("panel.extremes.search.testsuccess"));
                                     return;
                                 }
 
@@ -202,11 +226,10 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                                     if (collected != 0) {
                                         this.advancesTextFields[collected].setText(String.valueOf(cycles));
                                     }
-                                    System.out.println("high " + cycles);
                                     collected++;
                                     cycles = 0;
                                     if (collected == this.extremesNeeded) {
-                                        this.exit("Auto Searcher complete!");
+                                        this.exit(EnchantCrackerI18n.translate("panel.extremes.search.success"));
                                         this.crackButton.setEnabled(true);
                                         return;
                                     }
@@ -215,11 +238,10 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                                     if (collected != 0) {
                                         this.advancesTextFields[collected].setText(String.valueOf(cycles));
                                     }
-                                    System.out.println("low " + cycles);
                                     collected++;
                                     cycles = 0;
                                     if (collected == this.extremesNeeded) {
-                                        this.exit("Auto Searcher complete!");
+                                        this.exit(EnchantCrackerI18n.translate("panel.extremes.search.success"));
                                         this.crackButton.setEnabled(true);
                                         return;
                                     }
@@ -228,11 +250,10 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                                     if (collected != 0) {
                                         this.advancesTextFields[collected].setText(String.valueOf(cycles));
                                     }
-                                    System.out.println("low " + cycles);
                                     collected++;
                                     cycles = 0;
                                     if (collected == this.extremesNeeded) {
-                                        this.exit("Auto Searcher complete!");
+                                        this.exit(EnchantCrackerI18n.translate("panel.extremes.search.success"));
                                         this.crackButton.setEnabled(true);
                                         return;
                                     }
@@ -246,26 +267,26 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                                 ROBOT.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
                             }
                             else {
-                                this.resultMessage.setText("Soft Error, found empty page! (your delay might be too low)");
+                                System.out.println(EnchantCrackerI18n.translate("panels.extremes.search.error.emptypage"));
                             }
 
                             Thread.sleep(this.delay);
 
                         }
                     } catch (Exception e) {
-                        this.exit("Error! Something happened! (check console)");
-                        e.printStackTrace();
+                        this.exit(EnchantCrackerI18n.translate("panels.extremes.search.error.unknown"));
+                        e.printStackTrace(System.err);
                     }
                 });
-                cycleThread.start();
+                this.cycleThread.start();
             }
         }
         else if (!this.paused && keyEvent.getKeyCode() == NativeKeyEvent.VC_F12) {
-            this.exit("Auto Searcher force stopped!");
+            this.exit(EnchantCrackerI18n.translate("panel.extremes.search.terminated"));
         }
         else if (keyEvent.getKeyCode() == NativeKeyEvent.VC_F8) {
             this.paused = !this.paused;
-            this.resultMessage.setText("Auto Searcher paused = "+paused);
+            this.resultMessage.setText(EnchantCrackerI18n.translate("panel.extremes.search.paused."+this.paused));
         }
     }
 
@@ -282,24 +303,33 @@ public class AutoExtremeSearcher implements NativeKeyListener {
 
         Image image = saveImageFromClipboard();
         if (image == null) {
-            this.exit("Error! Failed to fetch screenshot from clipboard (took too long)!");
+            this.exit(EnchantCrackerI18n.translate("panel.extremes.search.error.clipboardfetch"));
             return null;
         }
         BufferedImage bufferedImage = convertToBufferedImage(image);
         if (bufferedImage == null) {
-            this.exit("Error! Failed to convert to buffered image!");
+            this.exit(EnchantCrackerI18n.translate("panel.extremes.search.error.badclipboard"));
             return null;
         }
         return bufferedImage;
     }
 
-    private void exit(String message) {
-        ROBOT.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-        ROBOT.keyRelease(KeyEvent.VK_ALT);
-        ROBOT.keyRelease(KeyEvent.VK_PRINTSCREEN);
-        GlobalScreen.removeNativeKeyListener(this);
-        this.resultMessage.setText(message);
-        this.hasStarted = false;
+    public void exit(String message) {
+        if (this.setup) {
+            if (this.hasStarted) {
+                this.cycleThread.interrupt();
+                ROBOT.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                ROBOT.keyRelease(KeyEvent.VK_ALT);
+                ROBOT.keyRelease(KeyEvent.VK_PRINTSCREEN);
+                this.hasStarted = false;
+                this.paused = false;
+                this.hasFoundAnything = false;
+            }
+            this.resultMessage.setText(message);
+            this.setupButton.setEnabled(true);
+            GlobalScreen.removeNativeKeyListener(this);
+        }
+        this.setup = false;
     }
 
     private Image saveImageFromClipboard() {
@@ -317,7 +347,7 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(trans, null);
                         return img;
                     } catch (UnsupportedFlavorException | IOException e) {
-                        e.printStackTrace();
+                        e.printStackTrace(System.err);
                     }
 
                 }
@@ -326,7 +356,7 @@ public class AutoExtremeSearcher implements NativeKeyListener {
             return null;
         }
         catch (InterruptedException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
             return null;
         }
     }

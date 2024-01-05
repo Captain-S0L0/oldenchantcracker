@@ -1,4 +1,6 @@
-package com.terriblefriends.oldenchcracker.thingmanagers;
+package com.terriblefriends.oldenchcracker.thingmanager;
+
+import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
 
 import java.util.function.Function;
 
@@ -15,7 +17,7 @@ public class EnchantmentManager {
             enchants[id] = new Enchantment(name, id, weight, maxLevel, getMinEnchantability, getMaxEnchantability, incompatibleEnchants);
         }
         else {
-            System.out.println("ERROR! Duplicate enchant id!");
+            throw new RuntimeException(String.format(EnchantCrackerI18n.translate("enchantment.error.duplicate"), id, name));
         }
     }
 }

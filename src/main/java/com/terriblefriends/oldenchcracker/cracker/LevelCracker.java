@@ -1,7 +1,9 @@
-package com.terriblefriends.oldenchcracker;
+package com.terriblefriends.oldenchcracker.cracker;
 
 import com.seedfinding.latticg.RandomReverser;
-import com.terriblefriends.oldenchcracker.versions.Version;
+import com.terriblefriends.oldenchcracker.EnchantCracker;
+import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
+import com.terriblefriends.oldenchcracker.version.Version;
 
 import java.util.ArrayList;
 
@@ -9,7 +11,7 @@ public class LevelCracker {
     private final int[][] levelData;
     private final Version version;
     private boolean failed = false;
-    private long result = -1;
+    private long result = EnchantCracker.SEED_RESULT_UNSET;
 
 
     public LevelCracker(int[][] levelData, Version version) {
@@ -26,14 +28,16 @@ public class LevelCracker {
 
         long[] seeds = reverser.findAllValidSeeds().toArray();
         if (seeds.length > 1) {
-            System.out.println("ERROR! Found more than 1 valid seed!");
+            System.err.println(EnchantCrackerI18n.translate("cracker.error.multipleseeds"));
             for (long l : seeds) {
-                System.out.println(l + "L");
+                System.err.println(l + "L");
             }
-            System.out.println("Using the first and hoping everything's alright...");
+            this.failed = true;
+            this.result = EnchantCracker.SEED_RESULT_MANYFOUND;
+            return;
         } else if (seeds.length == 0) {
-            System.out.println("ERROR! Failed to find valid seed!");
-            failed = true;
+            this.failed = true;
+            this.result = EnchantCracker.SEED_RESULT_NOTFOUND;
             return;
         }
 

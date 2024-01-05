@@ -1,9 +1,12 @@
-package com.terriblefriends.oldenchcracker;
+package com.terriblefriends.oldenchcracker.cracker;
 
 import com.seedfinding.latticg.RandomReverser;
-import com.terriblefriends.oldenchcracker.versions.Version;
+import com.terriblefriends.oldenchcracker.EnchantCracker;
+import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
+import com.terriblefriends.oldenchcracker.version.Version;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -11,14 +14,14 @@ public class GalacticCracker {
     private static final int WORD_LIST_LENGTH = 55;
     private static final long RANDOM_MULTIPLIER = 0x5DEECE66DL;
     private static final long RANDOM_MULTIPLIER_INVERSE = 0xdfe05bcb1365L;
-    private static final long RANDOM_DELTA = 0xbL;
+    private static final long RANDOM_DELTA = 0xBL;
     private static final long RANDOM_MASK = ((1L << 48)-1);
     private final int[][] words;
     private final int[] levels;
     private final int books;
     private final Version version;
     private boolean failed = false;
-    private long result = -1;
+    private long result = EnchantCracker.SEED_RESULT_UNSET;
 
 
     public GalacticCracker(int[][] words, int[] levels, int books, Version version) {
@@ -29,7 +32,7 @@ public class GalacticCracker {
     }
 
     public void run() {
-        RandomReverser reverser = new RandomReverser(new ArrayList<>(0));
+        RandomReverser reverser = new RandomReverser(Collections.emptyList());
 
         for (int slot = 0; slot < 3; slot++) {
             boolean four = words[slot][3] != -1;
@@ -44,25 +47,28 @@ public class GalacticCracker {
 
         long[] seeds = reverser.findAllValidSeeds().toArray();
         if (seeds.length > 1) {
-            System.out.println("ERROR! Found more than 1 valid seed!");
+            System.err.println(EnchantCrackerI18n.translate("cracker.error.multipleseeds"));
             for (long l : seeds) {
-                System.out.println(l+"L");
+                System.err.println(l+"L");
             }
-            System.out.println("Using the first and hoping everything's alright...");
+            this.failed = true;
+            this.result = EnchantCracker.SEED_RESULT_MANYFOUND;
+            return;
         }
         else if (seeds.length == 0) {
-            System.out.println("ERROR! Failed to find valid seed!");
-            failed = true;
+            this.failed = true;
+            this.result = EnchantCracker.SEED_RESULT_NOTFOUND;
             return;
         }
 
-        long wordSeed = seeds[0] ^ RANDOM_MULTIPLIER;
+        // XOR by RANDOM_MULTIPLIER to undo setSeed() scramble
+        long lower48 = seeds[0] ^ RANDOM_MULTIPLIER;
 
         List<Long> longSeeds = new ArrayList<>();
 
-        // normally, you can crack the seed of a random from the result of a nextLong() call, but we don't have the top 16 bits of that call so we brute force those
+        // normally, you can crack the seed of a random from the result of a nextLong() call really easily, but we don't have the top 16 bits of that call so we brute force those
         for (long topbits = 0; topbits < 65536; topbits++) {
-            long longToTest = (topbits << 48) + wordSeed;
+            long longToTest = (topbits << 48) + lower48;
 
             //THX https://stackoverflow.com/a/15237585
             long a = longToTest >>> 32;
@@ -79,7 +85,7 @@ public class GalacticCracker {
                         long longSeed = ((((a << 16) + c) - RANDOM_DELTA) * RANDOM_MULTIPLIER_INVERSE) & RANDOM_MASK;
 
                         //we don't need the levels to crack the RNG directly, but as 2 64 bit longs could be valid for a 48 bit seed, need this extra check
-                        Random sixteenCrack = new Random((longSeed ^ RANDOM_MULTIPLIER) & RANDOM_MASK);
+                        Random sixteenCrack = new Random(longSeed ^ RANDOM_MULTIPLIER);
                         sixteenCrack.nextLong();
 
                         int[] levels = version.getEnchantLevels(sixteenCrack, books);
@@ -93,16 +99,16 @@ public class GalacticCracker {
         }
 
         if (longSeeds.size() > 1) {
-            System.out.println("ERROR! Found more than 1 valid seed!");
+            System.err.println(EnchantCrackerI18n.translate("cracker.error.multipleseeds"));
             for (long l : longSeeds) {
-                System.out.println(l+"L");
+                System.err.println(l+"L");
             }
-            System.out.println("Using the 1st and hoping everything's alright...");
-            this.result = longSeeds.get(0);
+            this.failed = true;
+            this.result = EnchantCracker.SEED_RESULT_MANYFOUND;
         }
         else if (longSeeds.size() == 0) {
             this.failed = true;
-            System.out.println("ERROR! Failed to find valid long seed!");
+            this.result = EnchantCracker.SEED_RESULT_NOTFOUND;
         }
         else {
             this.result = longSeeds.get(0);

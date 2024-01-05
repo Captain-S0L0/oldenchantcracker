@@ -1,16 +1,18 @@
-package com.terriblefriends.oldenchcracker.thingmanagers;
+package com.terriblefriends.oldenchcracker.thingmanager;
+
+import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
 
 import java.util.HashMap;
 
 public class MaterialManager {
     private final HashMap<Integer, Material> materials = new HashMap<>();
 
-    public void register(int id, String string, int enchantability) {
+    public void register(int id, String name, int enchantability) {
         if (!materials.containsKey(id)) {
-            materials.put(id, new Material(string, enchantability));
+            materials.put(id, new Material(name, enchantability));
         }
         else {
-            throw new RuntimeException("Duplicate Material ID: "+string+"!");
+            throw new RuntimeException(String.format(EnchantCrackerI18n.translate("material.error.duplicate"), id, name));
         }
     }
 
