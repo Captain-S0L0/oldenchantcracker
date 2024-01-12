@@ -37,11 +37,9 @@ public class Main {
                     try {
                         long seed = Long.parseLong(arguments.next());
                         cracker.setRngSeed(seed);
-                        System.out.printf((EnchantCrackerI18n.translate("program.arg.seed")), seed);
-                        System.out.println();
+                        System.out.printf((EnchantCrackerI18n.translate("program.arg.seed")) + "%n", seed);
                     } catch (NoSuchElementException | NumberFormatException e) {
-                        System.err.printf((EnchantCrackerI18n.translate("program.arg.error.parse")), "--seed");
-                        System.err.println();
+                        System.err.printf((EnchantCrackerI18n.translate("program.arg.error.parse")) + "%n", "--seed");
                         System.err.println(EnchantCrackerI18n.translate("program.arg.help"));
                     }
                     break;
@@ -49,11 +47,9 @@ public class Main {
                     try {
                         int advances = Integer.parseInt(arguments.next());
                         cracker.setMaxAdvances(advances);
-                        System.out.printf((EnchantCrackerI18n.translate("program.arg.advances")), advances);
-                        System.out.println();
+                        System.out.printf((EnchantCrackerI18n.translate("program.arg.advances")) + "%n", advances);
                     } catch (NoSuchElementException | NumberFormatException e) {
-                        System.err.printf((EnchantCrackerI18n.translate("program.arg.error.parse")), "--advances");
-                        System.err.println();
+                        System.err.printf((EnchantCrackerI18n.translate("program.arg.error.parse")) + "%n", "--advances");
                         System.err.println(EnchantCrackerI18n.translate("program.arg.help"));
                     }
                     break;
@@ -93,14 +89,12 @@ public class Main {
                                 version = new Nine();
                                 break;
                             default:
-                                throw new NoSuchElementException();
+                                throw new IllegalArgumentException();
                         }
                         cracker.setVersion(version);
-                        System.out.printf((EnchantCrackerI18n.translate("program.arg.version")), EnchantCrackerI18n.translate("version." + versionI));
-                        System.out.println();
-                    } catch (NoSuchElementException | NumberFormatException e) {
-                        System.err.printf((EnchantCrackerI18n.translate("program.arg.error.parse")), "--version");
-                        System.err.println();
+                        System.out.printf((EnchantCrackerI18n.translate("program.arg.version")) + "%n", EnchantCrackerI18n.translate("version." + versionI));
+                    } catch (IllegalArgumentException e) {
+                        System.err.printf((EnchantCrackerI18n.translate("program.arg.error.parse")) + "%n", "--version");
                         System.err.println(EnchantCrackerI18n.translate("program.arg.help"));
                     }
                     break;
@@ -108,17 +102,14 @@ public class Main {
                     try {
                         int bookshelves = Integer.parseInt(arguments.next());
                         cracker.setBookshelves(bookshelves);
-                        System.out.printf((EnchantCrackerI18n.translate("program.arg.bookshelves")), bookshelves);
-                        System.out.println();
+                        System.out.printf((EnchantCrackerI18n.translate("program.arg.bookshelves")) + "%n", bookshelves);
                     } catch (NoSuchElementException | NumberFormatException e) {
-                        System.err.printf((EnchantCrackerI18n.translate("program.arg.error.parse")), "--bookshelves");
-                        System.err.println();
+                        System.err.printf((EnchantCrackerI18n.translate("program.arg.error.parse")) + "%n", "--bookshelves");
                         System.err.println(EnchantCrackerI18n.translate("program.arg.help"));
                     }
                     break;
                 default:
-                    System.err.printf((EnchantCrackerI18n.translate("program.arg.error.unknownarg")), nextArg);
-                    System.err.println();
+                    System.err.printf((EnchantCrackerI18n.translate("program.arg.error.unknownarg")) + "%n", nextArg);
                     return;
             }
         }

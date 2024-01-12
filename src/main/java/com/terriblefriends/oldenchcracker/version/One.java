@@ -1,6 +1,7 @@
 package com.terriblefriends.oldenchcracker.version;
 
 import com.seedfinding.latticg.RandomReverser;
+import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
 import com.terriblefriends.oldenchcracker.thingmanager.EnchantData;
 import com.terriblefriends.oldenchcracker.thingmanager.*;
 
@@ -108,6 +109,11 @@ public class One implements Version {
         booksStep2 = random.nextInt(5) + booksStep1;
         levels[2] = booksStep2;
         return levels;
+    }
+
+    @Override
+    public void reverseLevels(RandomReverser reverser, int[] cycle) {
+        throw new UnsupportedOperationException(EnchantCrackerI18n.translate("version.error.unsupported"));
     }
 
     @Override

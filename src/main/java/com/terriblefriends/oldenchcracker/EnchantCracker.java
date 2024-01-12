@@ -51,6 +51,8 @@ public class EnchantCracker {
 
         frame.add(this.tabs);
 
+        this.extremeSearcher.init();
+
         if (version != null) {
             createHelpPanel();
             createSetupPanel();
@@ -65,8 +67,6 @@ public class EnchantCracker {
         }
 
         frame.setVisible(true);
-
-        this.extremeSearcher.init();
     }
 
     public void setRngSeed(long seed) {
@@ -493,8 +493,7 @@ public class EnchantCracker {
 
                     this.rngSeed = galacticCracker.getResult();
 
-                    System.out.printf(EnchantCrackerI18n.translate("cracker.seed"), galacticCracker.getResult());
-                    System.out.println();
+                    System.out.printf(EnchantCrackerI18n.translate("cracker.seed") + "%n", galacticCracker.getResult());
                 }
 
                 crackButton.setEnabled(true);
@@ -987,8 +986,7 @@ public class EnchantCracker {
 
                     this.rngSeed = cracker.getResult();
 
-                    System.out.printf(EnchantCrackerI18n.translate("cracker.seed"), cracker.getResult());
-                    System.out.println();
+                    System.out.printf(EnchantCrackerI18n.translate("cracker.seed") + "%n", cracker.getResult());
                 }
 
                 crackButton.setEnabled(true);
@@ -1288,8 +1286,7 @@ public class EnchantCracker {
 
                     this.rngSeed = cracker.getResult();
 
-                    System.out.printf(EnchantCrackerI18n.translate("cracker.seed"), cracker.getResult());
-                    System.out.println();
+                    System.out.printf(EnchantCrackerI18n.translate("cracker.seed") + "%n", cracker.getResult());
                 }
 
                 crackButton.setEnabled(true);
@@ -1624,6 +1621,12 @@ public class EnchantCracker {
                             resultMessage.setText(EnchantCrackerI18n.translate("manipulator.error.conflicting"));
                             return;
                         }
+                        if (data.getEnchant().getMinEnchantability(data.getLevel()) > d2.getEnchant().getMaxEnchantability(d2.getLevel())
+                                || data.getEnchant().getMaxEnchantability(data.getLevel()) < d2.getEnchant().getMinEnchantability(d2.getLevel())
+                        ) {
+                            resultMessage.setText(EnchantCrackerI18n.translate("manipulator.error.impossible"));
+                            return;
+                        }
                     }
 
                     if (this.version.getMaxEnchantability(this.version.getMaterialEnchantability(materialStringsRaw.get(materialComboBox.getSelectedIndex())), this.version.getMaxLevels()) < data.getEnchant().getMinEnchantability(data.getLevel())) {
@@ -1667,6 +1670,13 @@ public class EnchantCracker {
                             resultMessage.setText(EnchantCrackerI18n.translate("manipulator.error.unknown"));
                         }
                     } else {
+                        StringBuilder resultBuilder = new StringBuilder();
+
+                        for (EnchantData data : finder.getResultEnchants()) {
+                            resultBuilder.append(String.format(EnchantCrackerI18n.translate("manipulator.found.enchantment"), EnchantCrackerI18n.translate(data.getEnchant().getName()), EnchantCrackerI18n.translate("enchantment.level."+(data.getLevel() - 1))));
+                        }
+                        resultBuilder.append("</HTML>");
+
                         if (advancedCheck.isSelected()) {
                             int swapDifferent = (finder.getResultAdvances() / 3);
                             int swap = 0;
@@ -1685,9 +1695,9 @@ public class EnchantCracker {
                             int outIn = swapDifferent % 2 == 1 ? 1 : 0;
                             swapDifferent -= outIn;
 
-                            resultMessage.setText(String.format(EnchantCrackerI18n.translate("manipulator.found.advanced"), swapDifferent, shift, outIn, swap, finder.getResultSlot() + 1, Arrays.toString(finder.getResultLevels())));
+                            resultMessage.setText(String.format(EnchantCrackerI18n.translate("manipulator.found.advanced") + resultBuilder, swapDifferent, shift, outIn, swap, finder.getResultSlot() + 1, Arrays.toString(finder.getResultLevels())));
                         } else {
-                            resultMessage.setText(String.format(EnchantCrackerI18n.translate("manipulator.found.simple"), finder.getResultAdvances(), finder.getResultSlot()+1, Arrays.toString(finder.getResultLevels())));
+                            resultMessage.setText(String.format(EnchantCrackerI18n.translate("manipulator.found.simple") + resultBuilder, finder.getResultAdvances(), finder.getResultSlot()+1, Arrays.toString(finder.getResultLevels())));
                         }
                         this.postManipulateRngSeed = finder.getResultSeed();
                         finalizeButton.setEnabled(true);
@@ -1748,8 +1758,7 @@ public class EnchantCracker {
 
         finalizeButton.addActionListener((event) -> {
             resultMessage.setText(EnchantCrackerI18n.translate("manipulator.waiting"));
-            System.out.printf(EnchantCrackerI18n.translate("manipulator.seed"), this.postManipulateRngSeed);
-            System.out.println();
+            System.out.printf(EnchantCrackerI18n.translate("manipulator.seed") + "%n", this.postManipulateRngSeed);
             this.rngSeed = this.postManipulateRngSeed;
             this.postManipulateRngSeed = SEED_RESULT_UNSET;
             finalizeButton.setEnabled(false);

@@ -9,44 +9,20 @@ import java.util.List;
 import java.util.Random;
 
 public interface Version {
-    default int getMaxBookShelves() {
-        return 0;
-    }
-    default String[] getItemStrings() {
-        return null;
-    }
-    default String[] getMaterialStrings(String item) {
-        return null;
-    }
-    default Item getItem(String item) {
-        return null;
-    }
-    default Enchantment getEnchant(int id) {
-        return null;
-    }
-    default int getMaxLevels() {
-        return 0;
-    }
-    default int getMaxEnchantability(int enchantability, int level) {
-        return 0;
-    }
-    default int getMaterialEnchantability(String material) {
-        return 0;
-    }
-    default int[] getEnchantLevels(Random random, int books) {
-        return null;
-    }
-    default void reverseLevels(RandomReverser reverser, int[] cycle) {}
-    default void reverseExtremes(RandomReverser reverser, int advances, boolean isLow) {}
-    default int getExtremesNeeded() {
-        return 0;
-    }
-    default List<EnchantData> getItemEnchantments(Random random, int enchantability, String item, int level) {
-        return null;
-    }
-    default CrackType getCrackType() {
-        return null;
-    }
+    int getMaxBookShelves();
+    String[] getItemStrings();
+    String[] getMaterialStrings(String item);
+    Item getItem(String item);
+    Enchantment getEnchant(int id);
+    int getMaxLevels();
+    int getMaxEnchantability(int enchantability, int level);
+    int getMaterialEnchantability(String material);
+    int[] getEnchantLevels(Random random, int books);
+    void reverseLevels(RandomReverser reverser, int[] cycle);
+    void reverseExtremes(RandomReverser reverser, int advances, boolean isLow);
+    int getExtremesNeeded();
+    List<EnchantData> getItemEnchantments(Random random, int enchantability, String item, int level);
+    CrackType getCrackType();
 
     enum CrackType {
         GALACTIC,

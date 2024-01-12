@@ -20,6 +20,7 @@ public class EnchantFinder {
     private int resultAdvances = EnchantCracker.FINDER_RESULT_UNSET;
     private int resultSlot = EnchantCracker.FINDER_RESULT_UNSET;
     private long resultSeed = EnchantCracker.FINDER_RESULT_UNSET;
+    private List<EnchantData> resultEnchants = null;
     private int[] resultLevels = new int[0];
     private boolean failed = false;
 
@@ -105,10 +106,7 @@ public class EnchantFinder {
                         }
 
                         if (valid) {
-                            for (EnchantData data : enchantList) {
-                                System.out.printf(EnchantCrackerI18n.translate("manipulator.found.enchantment"), EnchantCrackerI18n.translate(data.getEnchant().getName()), data.getLevel());
-                                System.out.println();
-                            }
+                            this.resultEnchants = enchantList;
 
                             this.resultLevels = levels;
                             this.resultAdvances = advances;
@@ -137,8 +135,7 @@ public class EnchantFinder {
                 levels = this.version.getEnchantLevels(this.random, this.books);
             }
         }
-        System.out.printf(EnchantCrackerI18n.translate("manipulator.error.notfound"), this.maxAdvances);
-        System.out.println();
+        System.out.printf(EnchantCrackerI18n.translate("manipulator.error.notfound")  + "%n", this.maxAdvances);
         this.resultAdvances = EnchantCracker.FINDER_RESULT_NOTFOUND;
         this.failed = true;
     }
@@ -162,4 +159,6 @@ public class EnchantFinder {
     public int[] getResultLevels() {
         return this.resultLevels;
     }
+
+    public List<EnchantData> getResultEnchants() {return this.resultEnchants;}
 }

@@ -1,6 +1,8 @@
 program.name = Pre 1.8 Enchantment Cracker
 program.author = Captain_S0L0
 
+lang.author = Captain_S0L0
+
 program.arg.error.unknownarg = Unknown argument %s\nTo see all arguments, use --help
 program.arg.error.parse = Failed to parse argument %s
 program.arg.seed = Set seed to %d
@@ -96,9 +98,9 @@ manipulator.error.unknown = Error! Unknown error searching for enchantments! (se
 manipulator.waiting = Doing nothing...
 manipulator.active = Searching...
 manipulator.seed = Post RNG Seed: %d
-manipulator.found.enchantment = Found enchantment %1$s @ level %2$d
-manipulator.found.simple = Advances: %1$d, Slot: %2$d, Levels: %3$s
-manipulator.found.advanced = <HTML>Swap Different: %1$d, Shift Remove + Insert: %2$d, OutIn: %3$d Swap Same: %4$d<BR>Slot: %5$d, Levels: %6$s</HTML>
+manipulator.found.enchantment = %1$s %2$s<BR>
+manipulator.found.simple = <HTML>Advances: %1$d, Slot: %2$d, Levels: %3$s<BR>
+manipulator.found.advanced = <HTML>Swap Different: %1$d, Shift Remove + Insert: %2$d, OutIn: %3$d Swap Same: %4$d<BR>Slot: %5$d, Levels: %6$s<BR>
 
 cracker.waiting = Doing nothing...
 cracker.active = Cracking...
@@ -108,6 +110,7 @@ cracker.error.multipleseeds = Error! Found more than 1 valid seed!
 cracker.success = Cracked RNG!
 cracker.seed = RNG Seed: %d
 
+version.error.unsupported = Error! Current version does not support requested methods!
 version.0 = b1.9pre4
 version.1 = b1.9pre5 - 11w50a (1.0)
 version.2 = 12w01a

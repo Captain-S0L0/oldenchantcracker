@@ -1,6 +1,7 @@
 package com.terriblefriends.oldenchcracker.version;
 
 import com.seedfinding.latticg.RandomReverser;
+import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
 import com.terriblefriends.oldenchcracker.thingmanager.EnchantData;
 import com.terriblefriends.oldenchcracker.thingmanager.*;
 
@@ -169,6 +170,16 @@ public class Eight implements Version {
 
         reverser.addNextIntCall(8, cycle[2]-1, cycle[2]-1);
         reverser.consumeNextIntCalls(1, 1);
+    }
+
+    @Override
+    public void reverseExtremes(RandomReverser reverser, int advances, boolean isLow) {
+        throw new UnsupportedOperationException(EnchantCrackerI18n.translate("version.error.unsupported"));
+    }
+
+    @Override
+    public int getExtremesNeeded() {
+        throw new UnsupportedOperationException(EnchantCrackerI18n.translate("version.error.unsupported"));
     }
 
     @Override
