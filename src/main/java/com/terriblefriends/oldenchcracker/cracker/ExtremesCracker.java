@@ -3,6 +3,7 @@ package com.terriblefriends.oldenchcracker.cracker;
 import com.seedfinding.latticg.RandomReverser;
 import com.terriblefriends.oldenchcracker.EnchantCracker;
 import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
+import com.terriblefriends.oldenchcracker.thingmanager.SeedResults;
 import com.terriblefriends.oldenchcracker.version.Version;
 
 import java.util.Collections;
@@ -12,7 +13,7 @@ public class ExtremesCracker {
     private final boolean[] isLow;
     private final Version version;
     private boolean failed = false;
-    private long result = EnchantCracker.SEED_RESULT_UNSET;
+    private long result = SeedResults.SEED_RESULT_UNSET.getValue();
 
 
     public ExtremesCracker(int[] advances, boolean[] isLow, Version version) {
@@ -36,9 +37,11 @@ public class ExtremesCracker {
                 System.err.println(l + "L");
             }
             this.failed = true;
+            this.result = SeedResults.SEED_RESULT_MANYFOUND.getValue();
             return;
         } else if (seeds.length == 0) {
             this.failed = true;
+            this.result = SeedResults.SEED_RESULT_NOTFOUND.getValue();
             return;
         }
 

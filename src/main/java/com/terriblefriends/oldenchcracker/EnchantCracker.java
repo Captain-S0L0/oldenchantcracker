@@ -1,9 +1,7 @@
 package com.terriblefriends.oldenchcracker;
 
 import com.terriblefriends.oldenchcracker.cracker.*;
-import com.terriblefriends.oldenchcracker.thingmanager.EnchantData;
-import com.terriblefriends.oldenchcracker.thingmanager.Enchantment;
-import com.terriblefriends.oldenchcracker.thingmanager.Item;
+import com.terriblefriends.oldenchcracker.thingmanager.*;
 import com.terriblefriends.oldenchcracker.version.*;
 
 import javax.swing.*;
@@ -17,20 +15,15 @@ import java.util.*;
 import java.util.List;
 
 public class EnchantCracker {
-    public static long SEED_RESULT_UNSET = -1;
-    public static long SEED_RESULT_NOTFOUND = -2;
-    public static long SEED_RESULT_MANYFOUND = -3;
-    public static int FINDER_RESULT_UNSET = -1;
-    public static int FINDER_RESULT_NOTFOUND = -2;
-    public static int EMPTY_VALUE = -1;
-    private Version version = null;
-    private int bookshelves = EMPTY_VALUE;
+    private static final int EMPTY_VALUE = -1;
     private final JTabbedPane tabs = new JTabbedPane();
     private final AutoExtremeSearcher extremeSearcher = new AutoExtremeSearcher();
-    private long rngSeed = SEED_RESULT_UNSET;
-    private long postManipulateRngSeed = SEED_RESULT_UNSET;
-    private int maxAdvances = 10000;
     private final List<EnchantData> desiredEnchants = new ArrayList<>();
+    private Version version = null;
+    private int bookshelves = EMPTY_VALUE;
+    private long rngSeed = SeedResults.SEED_RESULT_UNSET.getValue();
+    private long postManipulateRngSeed = SeedResults.SEED_RESULT_UNSET.getValue();
+    private int maxAdvances = 10000;
 
 
     public void init() {
@@ -190,29 +183,33 @@ public class EnchantCracker {
 
         setupLabel = new JLabel(EnchantCrackerI18n.translate("panel.setup.shelves"));
         bookSelectPanel.add(setupLabel);
-        JTextField setupBookSelector = new JTextField(3);
+
+        String[] setupBookSelectorStrings = new String[this.version.getMaxBookShelves() + 1];
+        for (int i = 0; i <= this.version.getMaxBookShelves(); i++) {
+            setupBookSelectorStrings[i] = Integer.toString(this.version.getMaxBookShelves() - i);
+        }
+        JComboBox<String> setupBookSelector = new JComboBox<>(setupBookSelectorStrings);
+        bookSelectPanel.add(setupBookSelector);
+
+        /*JTextField setupBookSelector = new JTextField(3);
         setupBookSelector.setTransferHandler(null);
         setupBookSelector.setText(String.valueOf(this.bookshelves));
-        bookSelectPanel.add(setupBookSelector);
+        bookSelectPanel.add(setupBookSelector);*/
 
         bookSelectPanel.setMaximumSize(bookSelectPanel.getPreferredSize());
         //End Book Select
-
-        JButton setupFinalizeButton = new JButton(EnchantCrackerI18n.translate("panel.setup.start"));
 
         layout.setHorizontalGroup(
                 layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup()
                                 .addComponent(versionSelectPanel)
                                 .addComponent(bookSelectPanel)
-                                .addComponent(setupFinalizeButton)
                         )
         );
         layout.setVerticalGroup(
                 layout.createSequentialGroup()
                         .addComponent(versionSelectPanel)
                         .addComponent(bookSelectPanel)
-                        .addComponent(setupFinalizeButton)
         );
 
         setupVersionSelector.addActionListener((event) -> {
@@ -253,51 +250,24 @@ public class EnchantCracker {
 
                     }
                     this.bookshelves = this.version.getMaxBookShelves();
-                    setupBookSelector.setText(String.valueOf(this.bookshelves));
+
+                    setupBookSelector.removeAllItems();
+                    for (int j = 0; j <= this.version.getMaxBookShelves(); j++) {
+                        setupBookSelector.addItem(Integer.toString(this.version.getMaxBookShelves() - j));
+                    }
+                    setupBookSelector.setSelectedIndex(0);
+
+                    this.createVersionPanels();
+
+                    break;
                 }
             }
         });
 
-        setupFinalizeButton.addActionListener((event) -> this.createVersionPanels());
-
-        setupBookSelector.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                int i;
-                String s = setupBookSelector.getText();
-                if (s == null) {
-                    s = "";
-                }
-                s+=e.getKeyChar();
-                try {
-                    i = Integer.parseInt(s);
-                }
-                catch (NumberFormatException nfe) {
-                    e.consume();
-                    return;
-                }
-                if (i > EnchantCracker.this.version.getMaxBookShelves()) {
-                    e.consume();
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                String text = setupBookSelector.getText();
-                if (text == null || text.length() == 0) {
-                    setupFinalizeButton.setEnabled(false);
-                    EnchantCracker.this.bookshelves = EMPTY_VALUE;
-                }
-                else {
-                    try {
-                        EnchantCracker.this.bookshelves = Integer.parseInt(text);
-                        setupFinalizeButton.setEnabled(true);
-                    }
-                    catch (NumberFormatException nfe) {
-                        setupFinalizeButton.setEnabled(false);
-                        e.consume();
-                    }
-                }
+        setupBookSelector.addActionListener((event) -> {
+            String s = (String)setupBookSelector.getSelectedItem();
+            if (s != null) {
+                this.bookshelves = Integer.parseInt(s);
             }
         });
 
@@ -619,7 +589,7 @@ public class EnchantCracker {
             }
             crackButton.setEnabled(false);
             crackerResultMessage.setText(EnchantCrackerI18n.translate("panel.cracker.cleared"));
-            this.rngSeed = SEED_RESULT_UNSET;
+            this.rngSeed = SeedResults.SEED_RESULT_UNSET.getValue();
         });
 
         crackerPanel.setFocusTraversalPolicy(new FocusTraversalPolicy() {
@@ -848,7 +818,7 @@ public class EnchantCracker {
         prtscrAttemptsPanel.add(crackerLabel);
 
         JTextField prtscrAttemptsField = new JTextField(5);
-        prtscrAttemptsField.setText("50");
+        prtscrAttemptsField.setText("5");
         prtscrAttemptsField.setTransferHandler(null);
         prtscrAttemptsField.setAlignmentX(Component.CENTER_ALIGNMENT);
         prtscrAttemptsPanel.add(prtscrAttemptsField);
@@ -1120,7 +1090,7 @@ public class EnchantCracker {
             }
             crackButton.setEnabled(false);
             resultMessage.setText(EnchantCrackerI18n.translate("panel.cracker.cleared"));
-            this.rngSeed = SEED_RESULT_UNSET;
+            this.rngSeed = SeedResults.SEED_RESULT_UNSET.getValue();
         });
 
         enableSearcherButton.addActionListener((event) -> {
@@ -1453,11 +1423,11 @@ public class EnchantCracker {
         manipulatorLabel = new JLabel(EnchantCrackerI18n.translate("panel.manipulator.item"));
         itemPanel.add(manipulatorLabel);
 
-        int itemCount = version.getItemStrings().length;
+        int itemCount = this.version.getItemStrings().length;
 
         String[] itemStrings = new String[itemCount];
         for (int i = 0; i < itemCount; i++) {
-            itemStrings[i] = EnchantCrackerI18n.translate(version.getItemStrings()[i]);
+            itemStrings[i] = EnchantCrackerI18n.translate(this.version.getItemStrings()[i]);
         }
 
         JComboBox<String> itemComboBox = new JComboBox<>(itemStrings);
@@ -1472,7 +1442,7 @@ public class EnchantCracker {
         manipulatorLabel = new JLabel(EnchantCrackerI18n.translate("panel.manipulator.material"));
         materialPanel.add(manipulatorLabel);
 
-        List<String> materialStringsRaw = new ArrayList<>(Arrays.asList(version.getMaterialStrings(version.getItemStrings()[0])));
+        List<String> materialStringsRaw = new ArrayList<>(Arrays.asList(this.version.getMaterialStrings(this.version.getItemStrings()[0])));
 
         String[] materialStrings = new String[materialStringsRaw.size()];
         for (int i = 0; i < materialStringsRaw.size(); i++) {
@@ -1503,7 +1473,6 @@ public class EnchantCracker {
 
         // Max Advances
         JPanel advancesPanel = new JPanel();
-        advancesPanel.setLayout(new BoxLayout(advancesPanel, BoxLayout.X_AXIS));
 
         manipulatorLabel = new JLabel(EnchantCrackerI18n.translate("panel.manipulator.maxadvances"));
         advancesPanel.add(manipulatorLabel);
@@ -1514,6 +1483,23 @@ public class EnchantCracker {
 
         advancesPanel.setMaximumSize(advancesPanel.getPreferredSize());
         // End Max Advances
+
+        // Max Level
+        JPanel maxLevelPanel = new JPanel();
+
+        manipulatorLabel = new JLabel(EnchantCrackerI18n.translate("panel.manipulator.maxlevel"));
+        maxLevelPanel.add(manipulatorLabel);
+
+        String[] maxLevelStrings = new String[this.version.getMaxLevels()];
+        for (int i = 0; i < this.version.getMaxLevels(); i++) {
+            maxLevelStrings[i] = Integer.toString(this.version.getMaxLevels() - i);
+        }
+
+        JComboBox<String> maxLevelSelect = new JComboBox<>(maxLevelStrings);
+        maxLevelPanel.add(maxLevelSelect);
+
+        maxLevelPanel.setMaximumSize(advancesPanel.getPreferredSize());
+        // End Max Level
 
         JButton findButton = new JButton(EnchantCrackerI18n.translate("panel.manipulator.enchantfind"));
         findButton.setEnabled(false);
@@ -1560,6 +1546,7 @@ public class EnchantCracker {
                         .addComponent(materialPanel)
                         .addComponent(settingsPanel)
                         .addComponent(advancesPanel)
+                        .addComponent(maxLevelPanel)
                         .addComponent(findButton)
                         .addComponent(finalizeButton)
                 )
@@ -1570,6 +1557,7 @@ public class EnchantCracker {
                 .addComponent(materialPanel)
                 .addComponent(settingsPanel)
                 .addComponent(advancesPanel)
+                .addComponent(maxLevelPanel)
                 .addComponent(findButton)
                 .addComponent(finalizeButton)
         );
@@ -1600,7 +1588,7 @@ public class EnchantCracker {
         );
 
         findButton.addActionListener((event) -> {
-            if (this.rngSeed == SEED_RESULT_UNSET) {
+            if (this.rngSeed == SeedResults.SEED_RESULT_UNSET.getValue()) {
                 resultMessage.setText(EnchantCrackerI18n.translate("manipulator.error.noseed"));
                 return;
             }
@@ -1613,6 +1601,7 @@ public class EnchantCracker {
                     return;
                 }
 
+                int requiredEnchantability = 0;
                 for (EnchantData data : this.desiredEnchants) {
                     List<EnchantData> copyData = new ArrayList<>(this.desiredEnchants);
                     copyData.remove(data);
@@ -1633,6 +1622,19 @@ public class EnchantCracker {
                         resultMessage.setText(EnchantCrackerI18n.translate("manipulator.error.impossible"));
                         return;
                     }
+
+                    int enchantability = data.getEnchant().getMinEnchantability(data.getLevel());
+                    if (enchantability > requiredEnchantability) {
+                        requiredEnchantability = enchantability;
+                    }
+                }
+
+                int maxLevels = Integer.parseInt((String)maxLevelSelect.getSelectedItem());
+                int materialEnchantability = this.version.getMaterialEnchantability(materialStringsRaw.get(materialComboBox.getSelectedIndex()));
+
+                if (requiredEnchantability > this.version.getMaxEnchantability(materialEnchantability, maxLevels)) {
+                    resultMessage.setText(EnchantCrackerI18n.translate("manipulator.error.impossible"));
+                    return;
                 }
 
                 resultMessage.setText(EnchantCrackerI18n.translate("manipulator.active"));
@@ -1653,7 +1655,7 @@ public class EnchantCracker {
                     }
                 }
 
-                EnchantFinder finder = new EnchantFinder(this.version.getItemStrings()[itemComboBox.getSelectedIndex()], materialStringsRaw.get(materialComboBox.getSelectedIndex()), this.rngSeed, this.version, this.bookshelves, this.maxAdvances, this.desiredEnchants, exactlyCheck.isSelected(), advancedCheck.isSelected());
+                EnchantFinder finder = new EnchantFinder(this.version.getItemStrings()[itemComboBox.getSelectedIndex()], materialEnchantability, this.rngSeed, this.version, this.bookshelves, this.maxAdvances, this.desiredEnchants, exactlyCheck.isSelected(), advancedCheck.isSelected(), maxLevels);
 
                 Thread waitThread = new Thread(() -> {
                     try {
@@ -1664,7 +1666,7 @@ public class EnchantCracker {
                     }
 
                     if (finder.getFailed()) {
-                        if (finder.getResultAdvances() == FINDER_RESULT_NOTFOUND) {
+                        if (finder.getResultAdvances() == FinderResults.FINDER_RESULT_NOTFOUND.getValue()) {
                             resultMessage.setText(String.format(EnchantCrackerI18n.translate("manipulator.error.notfound"), this.maxAdvances));
                         } else {
                             resultMessage.setText(EnchantCrackerI18n.translate("manipulator.error.unknown"));
@@ -1731,8 +1733,6 @@ public class EnchantCracker {
             String oldMaterial = (String)materialComboBox.getSelectedItem();
             materialComboBox.removeAllItems();
 
-
-
             materialStringsRaw.clear();
             Collections.addAll(materialStringsRaw, this.version.getMaterialStrings(item));
 
@@ -1760,7 +1760,7 @@ public class EnchantCracker {
             resultMessage.setText(EnchantCrackerI18n.translate("manipulator.waiting"));
             System.out.printf(EnchantCrackerI18n.translate("manipulator.seed") + "%n", this.postManipulateRngSeed);
             this.rngSeed = this.postManipulateRngSeed;
-            this.postManipulateRngSeed = SEED_RESULT_UNSET;
+            this.postManipulateRngSeed = SeedResults.SEED_RESULT_UNSET.getValue();
             finalizeButton.setEnabled(false);
         });
 

@@ -3,6 +3,7 @@ package com.terriblefriends.oldenchcracker.cracker;
 import com.seedfinding.latticg.RandomReverser;
 import com.terriblefriends.oldenchcracker.EnchantCracker;
 import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
+import com.terriblefriends.oldenchcracker.thingmanager.SeedResults;
 import com.terriblefriends.oldenchcracker.version.Version;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ public class GalacticCracker {
     private final int books;
     private final Version version;
     private boolean failed = false;
-    private long result = EnchantCracker.SEED_RESULT_UNSET;
+    private long result = SeedResults.SEED_RESULT_UNSET.getValue();
 
 
     public GalacticCracker(int[][] words, int[] levels, int books, Version version) {
@@ -52,12 +53,12 @@ public class GalacticCracker {
                 System.err.println(l+"L");
             }
             this.failed = true;
-            this.result = EnchantCracker.SEED_RESULT_MANYFOUND;
+            this.result = SeedResults.SEED_RESULT_MANYFOUND.getValue();
             return;
         }
         else if (seeds.length == 0) {
             this.failed = true;
-            this.result = EnchantCracker.SEED_RESULT_NOTFOUND;
+            this.result = SeedResults.SEED_RESULT_NOTFOUND.getValue();
             return;
         }
 
@@ -104,11 +105,11 @@ public class GalacticCracker {
                 System.err.println(l+"L");
             }
             this.failed = true;
-            this.result = EnchantCracker.SEED_RESULT_MANYFOUND;
+            this.result = SeedResults.SEED_RESULT_MANYFOUND.getValue();
         }
         else if (longSeeds.size() == 0) {
             this.failed = true;
-            this.result = EnchantCracker.SEED_RESULT_NOTFOUND;
+            this.result = SeedResults.SEED_RESULT_NOTFOUND.getValue();
         }
         else {
             this.result = longSeeds.get(0);

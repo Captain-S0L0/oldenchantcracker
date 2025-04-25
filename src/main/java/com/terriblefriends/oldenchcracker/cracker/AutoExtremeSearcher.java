@@ -51,6 +51,9 @@ public class AutoExtremeSearcher implements NativeKeyListener {
             false, true, true, true, false
     };
 
+    private static final int[] colorActive = new int[]{128, 255, 32};
+    private static final int[] colorInactive = new int[]{64, 127, 16};
+
     private Robot ROBOT;
     private int delay;
     private int extremesNeeded;
@@ -173,7 +176,7 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                             for (int y = 0; y < 7; y++) {
                                 for (int x = 0; x < 5; x++) {
                                     Color color = new Color(bufferedImage.getRGB(startX + (x * 2), startY + (y * 2)));
-                                    boolean found = (color.getRed() == 128 && color.getGreen() == 255 && color.getBlue() == 32);
+                                    boolean found = (color.getRed() == colorActive[0] && color.getGreen() == colorActive[1] && color.getBlue() == colorActive[2]) || (color.getRed() == colorInactive[0] && color.getGreen() == colorInactive[1] && color.getBlue() == colorInactive[2]);
                                     if (found) {
                                         foundAnything = true;
                                     }
@@ -188,7 +191,7 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                             for (int y = 0; y < 7; y++) {
                                 for (int x = 0; x < 5; x++) {
                                     Color color = new Color(bufferedImage.getRGB(startX + 12 + (x * 2), startY + (y * 2)));
-                                    boolean found = (color.getRed() == 128 && color.getGreen() == 255 && color.getBlue() == 32);
+                                    boolean found = (color.getRed() == colorActive[0] && color.getGreen() == colorActive[1] && color.getBlue() == colorActive[2]) || (color.getRed() == colorInactive[0] && color.getGreen() == colorInactive[1] && color.getBlue() == colorInactive[2]);
                                     if (found) {
                                         foundAnything = true;
                                     }
@@ -267,14 +270,17 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                                 ROBOT.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
                             }
                             else {
-                                System.out.println(EnchantCrackerI18n.translate("panels.extremes.search.error.emptypage"));
+                                System.out.println(EnchantCrackerI18n.translate("panel.extremes.search.error.emptypage"));
                             }
 
-                            Thread.sleep(this.delay);
+                            try {
+                                Thread.sleep(this.delay);
+                            }
+                            catch (InterruptedException ignored) {}
 
                         }
                     } catch (Exception e) {
-                        this.exit(EnchantCrackerI18n.translate("panels.extremes.search.error.unknown"));
+                        this.exit(EnchantCrackerI18n.translate("panel.extremes.search.error.unknown"));
                         e.printStackTrace(System.err);
                     }
                 });
@@ -333,32 +339,28 @@ public class AutoExtremeSearcher implements NativeKeyListener {
     }
 
     private Image saveImageFromClipboard() {
-        try {
-            int counter = 0;
-            while (counter < this.screenshotAttempts) {
-
+        int counter = 0;
+        while (counter < this.screenshotAttempts) {
+            try {
                 Thread.sleep(100);
-
-                Transferable trans = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
-                if (trans != null && trans.isDataFlavorSupported(DataFlavor.imageFlavor)) {
-                    try {
-                        Image img = (Image) trans.getTransferData(DataFlavor.imageFlavor);
-                        trans = new StringSelection("");
-                        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(trans, null);
-                        return img;
-                    } catch (UnsupportedFlavorException | IOException e) {
-                        e.printStackTrace(System.err);
-                    }
-
-                }
-                counter++;
             }
-            return null;
+            catch (InterruptedException ignored) {}
+
+            Transferable trans = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
+            if (trans != null && trans.isDataFlavorSupported(DataFlavor.imageFlavor)) {
+                try {
+                    Image img = (Image) trans.getTransferData(DataFlavor.imageFlavor);
+                    trans = new StringSelection("");
+                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(trans, null);
+                    return img;
+                } catch (UnsupportedFlavorException | IOException e) {
+                    e.printStackTrace(System.err);
+                }
+
+            }
+            counter++;
         }
-        catch (InterruptedException e) {
-            e.printStackTrace(System.err);
-            return null;
-        }
+        return null;
     }
 
 

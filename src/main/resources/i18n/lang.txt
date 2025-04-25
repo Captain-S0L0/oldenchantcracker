@@ -85,6 +85,7 @@ panel.manipulator.material = Material:
 panel.manipulator.exactly = Exactly:
 panel.manipulator.advanced = Advanced Advances:
 panel.manipulator.maxadvances = Max Advances:
+panel.manipulator.maxlevel = Max Level:
 panel.manipulator.enchantfind = Find Enchants
 panel.manipulator.enchantdone = Enchantment Done!
 

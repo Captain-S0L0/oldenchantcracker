@@ -186,14 +186,14 @@ public class Seven implements Version {
 
     @Override
     public List<EnchantData> getItemEnchantments(Random random, int enchantability, String item, int level) {
-        enchantability/=2;
-        enchantability = 1 + random.nextInt((enchantability >> 1)+1) + random.nextInt((enchantability >> 1)+1);
+        enchantability /= 2;
+        enchantability = 1 + random.nextInt((enchantability >> 1) + 1) + random.nextInt((enchantability >> 1) + 1);
         int enchantStep1 = enchantability + level;
         float enchantStep2 = (random.nextFloat() + random.nextFloat() - 1.0F) * 0.15F;
-        int enchantStep3 = (int)((float)enchantStep1 * (1.0F + enchantStep2) + 0.5F);
+        int finalEnchantability = (int)((float)enchantStep1 * (1.0F + enchantStep2) + 0.5F);
 
-        if (enchantStep3 < 1) {
-            enchantStep3 = 1;
+        if (finalEnchantability < 1) {
+            finalEnchantability = 1;
         }
 
         List<EnchantData> enchantmentsFinal = null;
@@ -204,7 +204,7 @@ public class Seven implements Version {
             Enchantment enchant = ENCHANTMENT_MANAGER.getEnchants()[id];
             if (enchant != null && ITEM_MANAGER.getItem(item).validEnchantment(enchant.getId())) {
                 for (int enchantLevel = 1; enchantLevel <= enchant.getMaxLevel(); enchantLevel++) {
-                    if (enchantStep3 >= enchant.getMinEnchantability(enchantLevel) && enchantStep3 <= enchant.getMaxEnchantability(enchantLevel)) {
+                    if (finalEnchantability >= enchant.getMinEnchantability(enchantLevel) && finalEnchantability <= enchant.getMaxEnchantability(enchantLevel)) {
                         if (enchantmentCandidates == null) {
                             enchantmentCandidates = new HashMap<>();
                         }
@@ -226,7 +226,7 @@ public class Seven implements Version {
 
                 enchantmentsFinal = new ArrayList<>();
                 enchantmentsFinal.add(selectedEnchant);
-                for (int multipleChance = enchantStep3; random.nextInt(50) <= multipleChance; multipleChance >>= 1) {
+                for (int multipleChance = finalEnchantability; random.nextInt(50) <= multipleChance; multipleChance >>= 1) {
                     Iterator<Integer> multipleIterator = enchantmentCandidates.keySet().iterator();
                     while (multipleIterator.hasNext()) {
                         int multipleId = multipleIterator.next();

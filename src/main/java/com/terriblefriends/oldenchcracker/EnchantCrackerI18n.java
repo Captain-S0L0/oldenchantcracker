@@ -17,7 +17,10 @@ public class EnchantCrackerI18n {
         if (I18N.containsKey(key)) {
             return I18N.getString(key).trim();
         }
-        else return key;
+        else {
+            System.err.println("Failed to find entry for translation key " + key + "!");
+            return key;
+        }
     }
 
     private static class UTF8ResourceBundleControl extends ResourceBundle.Control {
