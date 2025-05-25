@@ -1,7 +1,6 @@
 package com.terriblefriends.oldenchcracker.cracker;
 
 import com.seedfinding.latticg.RandomReverser;
-import com.terriblefriends.oldenchcracker.EnchantCracker;
 import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
 import com.terriblefriends.oldenchcracker.thingmanager.SeedResults;
 import com.terriblefriends.oldenchcracker.version.Version;
@@ -56,9 +55,10 @@ public class ExtremesCracker {
             total += (i + 1);
         }
 
-        for (int i = 0; i < (total * 3)+2; i++) {
+        // add 3 to include advances from changing bookshelf count from 7 to 30
+        for (int i = 0; i < (total * 3)+2+3; i++) {
             advanceToPresent.nextLong();
-            this.version.getEnchantLevels(advanceToPresent, 30);
+            this.version.getEnchantLevels(advanceToPresent, 8);
         }
 
         this.result = advanceToPresent.getSeed();
