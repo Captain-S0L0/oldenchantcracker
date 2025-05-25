@@ -56,42 +56,7 @@ public class Main {
                 case "--version":
                     try {
                         int versionI = Integer.parseInt(arguments.next());
-                        Version version;
-                        switch (versionI) {
-                            case 0:
-                                version = new Zero();
-                                break;
-                            case 1:
-                                version = new One();
-                                break;
-                            case 2:
-                                version = new Two();
-                                break;
-                            case 3:
-                                version = new Three();
-                                break;
-                            case 4:
-                                version = new Four();
-                                break;
-                            case 5:
-                                version = new Five();
-                                break;
-                            case 6:
-                                version = new Six();
-                                break;
-                            case 7:
-                                version = new Seven();
-                                break;
-                            case 8:
-                                version = new Eight();
-                                break;
-                            case 9:
-                                version = new Nine();
-                                break;
-                            default:
-                                throw new IllegalArgumentException();
-                        }
-                        cracker.setVersion(version);
+                        cracker.setVersion(Versions.intToVersion(versionI));
                         System.out.printf((EnchantCrackerI18n.translate("program.arg.version")) + "%n", EnchantCrackerI18n.translate("version." + versionI));
                     } catch (IllegalArgumentException e) {
                         System.err.printf((EnchantCrackerI18n.translate("program.arg.error.parse")) + "%n", "--version");

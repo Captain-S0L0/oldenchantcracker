@@ -1,7 +1,6 @@
 package com.terriblefriends.oldenchcracker.cracker;
 
 import com.seedfinding.latticg.RandomReverser;
-import com.terriblefriends.oldenchcracker.EnchantCracker;
 import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
 import com.terriblefriends.oldenchcracker.thingmanager.SeedResults;
 import com.terriblefriends.oldenchcracker.version.Version;

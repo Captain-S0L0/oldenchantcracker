@@ -25,39 +25,32 @@ public class EnchantCracker {
     private long postManipulateRngSeed = SeedResults.SEED_RESULT_UNSET.getValue();
     private int maxAdvances = 10000;
 
-
     public void init() {
         JFrame frame = new JFrame(EnchantCrackerI18n.translate("program.name"));
         URL iconUrl = Main.class.getResource("/graphic/icon.png");
         frame.setIconImage(Toolkit.getDefaultToolkit().getImage(iconUrl));
 
         frame.setSize(600,600);
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        frame.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                EnchantCracker.this.extremeSearcher.exit(EnchantCrackerI18n.translate("panel.extremes.search.terminated"));
-                EnchantCracker.this.extremeSearcher.close();
-                System.exit(0);
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            EnchantCracker.this.extremeSearcher.close();
+        }));
 
         frame.add(this.tabs);
 
         this.extremeSearcher.init();
 
-        if (version != null) {
-            createHelpPanel();
-            createSetupPanel();
-            this.createVersionPanels();
+        if (this.version == null) {
+            this.setVersion(Versions.ZERO);
         }
-        else {
-            this.version = new Zero();
-            this.bookshelves = this.version.getMaxBookShelves();
+        if (this.bookshelves == EMPTY_VALUE) {
+            this.setBookshelves(this.version.getMaxBookShelves());
+        }
 
-            createHelpPanel();
-            createSetupPanel();
-        }
+        this.createHelpPanel();
+        this.createSetupPanel();
+        this.createVersionPanels();
 
         frame.setVisible(true);
     }
@@ -72,11 +65,13 @@ public class EnchantCracker {
 
     public void setVersion(Version version) {
         this.version = version;
-        this.bookshelves = version.getMaxBookShelves();
+        if (this.bookshelves == EMPTY_VALUE || this.bookshelves > version.getMaxBookShelves()) {
+            this.bookshelves = version.getMaxBookShelves();
+        }
     }
 
     public void setBookshelves(int bookshelves) {
-        if (bookshelves <= this.version.getMaxBookShelves()) {
+        if (this.version == null || bookshelves <= this.version.getMaxBookShelves()) {
             this.bookshelves = bookshelves;
         }
     }
@@ -97,6 +92,9 @@ public class EnchantCracker {
 
             if (this.extremeSearcher.getInitialized()) {
                 createExtremesCrackerPanel();
+            }
+            else {
+
             }
         }
 
@@ -160,19 +158,12 @@ public class EnchantCracker {
 
         setupLabel = new JLabel(EnchantCrackerI18n.translate("panel.setup.version"));
         versionSelectPanel.add(setupLabel);
-        String[] versionStrings = new String[]{
-                EnchantCrackerI18n.translate("version.0"),
-                EnchantCrackerI18n.translate("version.1"),
-                EnchantCrackerI18n.translate("version.2"),
-                EnchantCrackerI18n.translate("version.3"),
-                EnchantCrackerI18n.translate("version.4"),
-                EnchantCrackerI18n.translate("version.5"),
-                EnchantCrackerI18n.translate("version.6"),
-                EnchantCrackerI18n.translate("version.7"),
-                EnchantCrackerI18n.translate("version.8"),
-                EnchantCrackerI18n.translate("version.9")
-        };
+        String[] versionStrings = new String[Versions.VERSIONS.length];
+        for (int i = 0; i < Versions.VERSIONS.length; i++) {
+            versionStrings[i] = EnchantCrackerI18n.translate("version." + i);
+        }
         JComboBox<String> setupVersionSelector = new JComboBox<>(versionStrings);
+        setupVersionSelector.setSelectedIndex(Versions.versionToInt(this.version));
         versionSelectPanel.add(setupVersionSelector);
 
         versionSelectPanel.setMaximumSize(versionSelectPanel.getPreferredSize());
@@ -189,12 +180,8 @@ public class EnchantCracker {
             setupBookSelectorStrings[i] = Integer.toString(this.version.getMaxBookShelves() - i);
         }
         JComboBox<String> setupBookSelector = new JComboBox<>(setupBookSelectorStrings);
+        setupBookSelector.setSelectedIndex(setupBookSelectorStrings.length - this.bookshelves - 1);
         bookSelectPanel.add(setupBookSelector);
-
-        /*JTextField setupBookSelector = new JTextField(3);
-        setupBookSelector.setTransferHandler(null);
-        setupBookSelector.setText(String.valueOf(this.bookshelves));
-        bookSelectPanel.add(setupBookSelector);*/
 
         bookSelectPanel.setMaximumSize(bookSelectPanel.getPreferredSize());
         //End Book Select
@@ -216,40 +203,8 @@ public class EnchantCracker {
             Object selection = setupVersionSelector.getSelectedItem();
             for (int i = 0; i < versionStrings.length; i++) {
                 if (Objects.equals(selection, versionStrings[i])) {
-                    switch (i) {
-                        case 0:
-                            this.version = new Zero();
-                            break;
-                        case 1:
-                            this.version = new One();
-                            break;
-                        case 2:
-                            this.version = new Two();
-                            break;
-                        case 3:
-                            this.version = new Three();
-                            break;
-                        case 4:
-                            this.version = new Four();
-                            break;
-                        case 5:
-                            this.version = new Five();
-                            break;
-                        case 6:
-                            this.version = new Six();
-                            break;
-                        case 7:
-                            this.version = new Seven();
-                            break;
-                        case 8:
-                            this.version = new Eight();
-                            break;
-                        case 9:
-                            this.version = new Nine();
-                            break;
-
-                    }
-                    this.bookshelves = this.version.getMaxBookShelves();
+                    this.setVersion(Versions.intToVersion(i));
+                    this.setBookshelves(this.version.getMaxBookShelves());
 
                     setupBookSelector.removeAllItems();
                     for (int j = 0; j <= this.version.getMaxBookShelves(); j++) {
@@ -267,7 +222,7 @@ public class EnchantCracker {
         setupBookSelector.addActionListener((event) -> {
             String s = (String)setupBookSelector.getSelectedItem();
             if (s != null) {
-                this.bookshelves = Integer.parseInt(s);
+                this.setBookshelves(Integer.parseInt(s));
             }
         });
 
@@ -745,7 +700,7 @@ public class EnchantCracker {
         for (int extreme = 0; extreme < this.version.getExtremesNeeded(); extreme++) {
             JTextField field = new JTextField(5);
             if (extreme == 0) {
-                field.setEditable(false);
+                field.setEnabled(false);
                 field.setText("0");
             }
             field.setTransferHandler(null);
@@ -862,6 +817,8 @@ public class EnchantCracker {
 
         JLabel resultMessage = new JLabel(EnchantCrackerI18n.translate("cracker.waiting"));
 
+        JLabel usageMessage = new JLabel(EnchantCrackerI18n.translate("panel.extremes.search.instructions"));
+
         JButton clearButton = new JButton(EnchantCrackerI18n.translate("panel.cracker.clear"));
 
         JButton crackButton = new JButton(EnchantCrackerI18n.translate("panel.cracker.crack"));
@@ -895,6 +852,7 @@ public class EnchantCracker {
                                         .addComponent(enableSearcherButton)
                                 )
                                 .addComponent(resultMessage)
+                                .addComponent(usageMessage)
                         )
         );
 
@@ -922,6 +880,7 @@ public class EnchantCracker {
                                 .addComponent(enableSearcherButton)
                         )
                         .addComponent(resultMessage)
+                        .addComponent(usageMessage)
         );
 
         crackButton.addActionListener((event) -> {
@@ -1084,7 +1043,7 @@ public class EnchantCracker {
                 box.setSelected(false);
             }
             for (JTextField field : advancesFields) {
-                if (field.isEditable()) {
+                if (field.isEnabled()) {
                     field.setText("");
                 }
             }
@@ -1095,6 +1054,11 @@ public class EnchantCracker {
 
         enableSearcherButton.addActionListener((event) -> {
             try {
+                if (!this.extremeSearcher.getInitialized()) {
+                    resultMessage.setText(EnchantCrackerI18n.translate("panel.extremes.search.error.unknown"));
+                    return;
+                }
+
                 String s = searchDelayField.getText();
                 if (s == null || s.length() == 0) {
                     resultMessage.setText(EnchantCrackerI18n.translate("panel.extremes.search.error.delay"));
@@ -1120,10 +1084,44 @@ public class EnchantCracker {
                 }
                 int screenshots = Integer.parseInt(s);
 
-                resultMessage.setText(EnchantCrackerI18n.translate("panel.extremes.search.instructions"));
+                // clear input data
+                for (JCheckBox box : lowChecks) {
+                    box.setSelected(false);
+                }
+                for (JTextField field : advancesFields) {
+                    if (field.isEnabled()) {
+                        field.setText("");
+                    }
+                }
+                crackButton.setEnabled(false);
+                this.rngSeed = SeedResults.SEED_RESULT_UNSET.getValue();
 
-                this.extremeSearcher.exit(EnchantCrackerI18n.translate("panel.extremes.search.terminated"));
-                this.extremeSearcher.setup(this.version, delay, x, y, searchTypeComboBox.getSelectedIndex() == 0, screenshots, testModeCheck.isSelected(), advancesFields, lowChecks, crackButton, enableSearcherButton, resultMessage);
+                // disable input manipulation while searcher is active
+                searchTypeComboBox.setEnabled(false);
+                testModeCheck.setEnabled(false);
+                Arrays.stream(advancesFields).forEach(f -> f.setEditable(false));
+                Arrays.stream(lowChecks).forEach(c -> c.setEnabled(false));
+                xField.setEditable(false);
+                yField.setEditable(false);
+                prtscrAttemptsField.setEditable(false);
+                searchDelayField.setEditable(false);
+                clearButton.setEnabled(false);
+
+                Runnable runnableEnableFields = () -> {
+                    searchTypeComboBox.setEnabled(true);
+                    testModeCheck.setEnabled(true);
+                    Arrays.stream(advancesFields).forEach(f -> f.setEditable(true));
+                    Arrays.stream(lowChecks).forEach(c -> c.setEnabled(true));
+                    xField.setEditable(true);
+                    yField.setEditable(true);
+                    prtscrAttemptsField.setEditable(true);
+                    searchDelayField.setEditable(true);
+                    clearButton.setEnabled(true);
+                };
+
+                this.extremeSearcher.setup(this.version, delay, x, y, searchTypeComboBox.getSelectedIndex() == 0, screenshots, testModeCheck.isSelected(), advancesFields, lowChecks, crackButton, enableSearcherButton, resultMessage, runnableEnableFields);
+
+                resultMessage.setText(EnchantCrackerI18n.translate("panel.extremes.search.ready"));
                 enableSearcherButton.setEnabled(false);
             }
             catch (NumberFormatException e) {
@@ -1593,10 +1591,10 @@ public class EnchantCracker {
                 return;
             }
 
-            if (this.desiredEnchants.size() == 0) {
+            if (this.desiredEnchants.isEmpty()) {
                 resultMessage.setText(EnchantCrackerI18n.translate("manipulator.error.noenchants"));
             } else {
-                if (Objects.equals(materialStringsRaw.get(materialComboBox.getSelectedIndex()), "material.book") && !(this.version instanceof Nine) && this.desiredEnchants.size() > 1) {
+                if (Objects.equals(materialStringsRaw.get(materialComboBox.getSelectedIndex()), "material.book") && !(this.version == Versions.NINE) && this.desiredEnchants.size() > 1) {
                     resultMessage.setText(EnchantCrackerI18n.translate("manipulator.error.impossiblebook"));
                     return;
                 }

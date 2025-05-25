@@ -7,67 +7,53 @@ import com.terriblefriends.oldenchcracker.thingmanager.*;
 
 import java.util.*;
 
-public class Four implements Version {
+class Four extends Version {
     //Tools for Minecraft versions 12w18a (1.3 snap) to 12w21b (1.3 snap)
 
-    private static final EnchantmentManager ENCHANTMENT_MANAGER = new EnchantmentManager();
-    private static final ItemManager ITEM_MANAGER = new ItemManager();
-    private static final MaterialManager MATERIAL_MANAGER = new MaterialManager();
+    protected Four() {
+        enchantmentManager.register("enchantment.protection", 0, 10, 4, l -> 1 + (l - 1) * 16, l -> (1 + (l - 1) * 16) + 20, new int[]{1, 3, 4});
+        enchantmentManager.register("enchantment.fire_protection", 1, 5, 4, l -> 10 + (l - 1) * 8, l -> (10 + (l - 1) * 8) + 12, new int[]{0, 3, 4});
+        enchantmentManager.register("enchantment.feather_falling", 2, 5, 4, l -> 5 + (l - 1) * 6, l -> (5 + (l - 1) * 6) + 10, null);
+        enchantmentManager.register("enchantment.blast_protection", 3, 2, 4, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 12, new int[]{0, 1, 4});
+        enchantmentManager.register("enchantment.projectile_protection", 4, 5, 4, l -> 3 + (l - 1) * 6, l -> (3 + (l - 1) * 6) + 15, new int[]{0, 1, 3});
+        enchantmentManager.register("enchantment.respiration", 5, 2, 3, l -> 10 * l, l -> (10 * l) + 30, null);
+        enchantmentManager.register("enchantment.aqua_affinity", 6, 2, 1, l -> 1, l -> 41, null);
+        enchantmentManager.register("enchantment.sharpness", 16, 10, 5, l -> 1 + (l - 1) * 16, l -> (1 + (l - 1) * 16) + 20, new int[]{17, 18});
+        enchantmentManager.register("enchantment.smite", 17, 5, 5, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 20, new int[]{16, 18});
+        enchantmentManager.register("enchantment.bane_of_arthropods", 18, 5, 5, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 20, new int[]{16, 17});
+        enchantmentManager.register("enchantment.knockback", 19, 5, 2, l -> 5 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
+        enchantmentManager.register("enchantment.fire_aspect", 20, 2, 2, l -> 10 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
+        enchantmentManager.register("enchantment.looting", 21, 2, 3, l -> 20 + (l - 1) * 12, l -> (1 + l * 10) + 50, null);
+        enchantmentManager.register("enchantment.efficiency", 32, 10, 5, l -> 1 + 15 * (l - 1), l -> (1 + l * 10) + 50, null);
+        enchantmentManager.register("enchantment.silk_touch", 33, 1, 1, l -> 25, l -> (1 + l * 10) + 50, new int[]{35});
+        enchantmentManager.register("enchantment.unbreaking", 34, 5, 3, l -> 5 + (l - 1) * 10, l -> (1 + l * 10) + 50, null);
+        enchantmentManager.register("enchantment.fortune", 35, 2, 3, l -> 20 + (l - 1) * 12, l -> (1 + l * 10) + 50, new int[]{33});
+        enchantmentManager.register("enchantment.power", 48, 10, 5, l -> 1 + (l - 1) * 10, l -> (1 + (l - 1) * 10) + 15, null);
+        enchantmentManager.register("enchantment.punch", 49, 2, 2, l -> 12 + (l - 1) * 20, l -> (12 + (l - 1) * 20) + 25, null);
+        enchantmentManager.register("enchantment.flame", 50, 2, 1, l -> 20, l -> 50, null);
+        enchantmentManager.register("enchantment.infinity", 51, 1, 1, l -> 20, l -> 50, null);
 
-    static {
-        ENCHANTMENT_MANAGER.register("enchantment.protection", 0, 10, 4, l -> 1 + (l - 1) * 16, l -> (1 + (l - 1) * 16) + 20, new int[]{1, 3, 4});
-        ENCHANTMENT_MANAGER.register("enchantment.fire_protection", 1, 5, 4, l -> 10 + (l - 1) * 8, l -> (10 + (l - 1) * 8) + 12, new int[]{0, 3, 4});
-        ENCHANTMENT_MANAGER.register("enchantment.feather_falling", 2, 5, 4, l -> 5 + (l - 1) * 6, l -> (5 + (l - 1) * 6) + 10, null);
-        ENCHANTMENT_MANAGER.register("enchantment.blast_protection", 3, 2, 4, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 12, new int[]{0, 1, 4});
-        ENCHANTMENT_MANAGER.register("enchantment.projectile_protection", 4, 5, 4, l -> 3 + (l - 1) * 6, l -> (3 + (l - 1) * 6) + 15, new int[]{0, 1, 3});
-        ENCHANTMENT_MANAGER.register("enchantment.respiration", 5, 2, 3, l -> 10 * l, l -> (10 * l) + 30, null);
-        ENCHANTMENT_MANAGER.register("enchantment.aqua_affinity", 6, 2, 1, l -> 1, l -> 41, null);
-        ENCHANTMENT_MANAGER.register("enchantment.sharpness", 16, 10, 5, l -> 1 + (l - 1) * 16, l -> (1 + (l - 1) * 16) + 20, new int[]{17, 18});
-        ENCHANTMENT_MANAGER.register("enchantment.smite", 17, 5, 5, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 20, new int[]{16, 18});
-        ENCHANTMENT_MANAGER.register("enchantment.bane_of_arthropods", 18, 5, 5, l -> 5 + (l - 1) * 8, l -> (5 + (l - 1) * 8) + 20, new int[]{16, 17});
-        ENCHANTMENT_MANAGER.register("enchantment.knockback", 19, 5, 2, l -> 5 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("enchantment.fire_aspect", 20, 2, 2, l -> 10 + 20 * (l - 1), l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("enchantment.looting", 21, 2, 3, l -> 20 + (l - 1) * 12, l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("enchantment.efficiency", 32, 10, 5, l -> 1 + 15 * (l - 1), l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("enchantment.silk_touch", 33, 1, 1, l -> 25, l -> (1 + l * 10) + 50, new int[]{35});
-        ENCHANTMENT_MANAGER.register("enchantment.unbreaking", 34, 5, 3, l -> 5 + (l - 1) * 10, l -> (1 + l * 10) + 50, null);
-        ENCHANTMENT_MANAGER.register("enchantment.fortune", 35, 2, 3, l -> 20 + (l - 1) * 12, l -> (1 + l * 10) + 50, new int[]{33});
-        ENCHANTMENT_MANAGER.register("enchantment.power", 48, 10, 5, l -> 1 + (l - 1) * 10, l -> (1 + (l - 1) * 10) + 15, null);
-        ENCHANTMENT_MANAGER.register("enchantment.punch", 49, 2, 2, l -> 12 + (l - 1) * 20, l -> (12 + (l - 1) * 20) + 25, null);
-        ENCHANTMENT_MANAGER.register("enchantment.flame", 50, 2, 1, l -> 20, l -> 50, null);
-        ENCHANTMENT_MANAGER.register("enchantment.infinity", 51, 1, 1, l -> 20, l -> 50, null);
+        itemManager.register("item.helmet", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 5, 6});
+        itemManager.register("item.chestplate", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4});
+        itemManager.register("item.leggings", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4});
+        itemManager.register("item.boots", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 2, 3, 4});
+        itemManager.register("item.sword", new int[]{0, 1, 2, 3, 4}, new int[]{16, 17, 18, 19, 20, 21});
+        itemManager.register("item.pickaxe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
+        itemManager.register("item.axe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
+        itemManager.register("item.shovel", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
+        itemManager.register("item.bow", new int[]{10}, new int[]{48, 49, 50, 51});
 
-        ITEM_MANAGER.register("item.helmet", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4, 5, 6});
-        ITEM_MANAGER.register("item.chestplate", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4});
-        ITEM_MANAGER.register("item.leggings", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 3, 4});
-        ITEM_MANAGER.register("item.boots", new int[]{5, 6, 7, 8, 9}, new int[]{0, 1, 2, 3, 4});
-        ITEM_MANAGER.register("item.sword", new int[]{0, 1, 2, 3, 4}, new int[]{16, 17, 18, 19, 20, 21});
-        ITEM_MANAGER.register("item.pickaxe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
-        ITEM_MANAGER.register("item.axe", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
-        ITEM_MANAGER.register("item.shovel", new int[]{0, 1, 2, 3, 4}, new int[]{32, 33, 34, 35});
-        ITEM_MANAGER.register("item.bow", new int[]{10}, new int[]{48, 49, 50, 51});
-
-        MATERIAL_MANAGER.register(0, "material.tool.wood", 15);
-        MATERIAL_MANAGER.register(1, "material.tool.stone", 5);
-        MATERIAL_MANAGER.register(2, "material.tool.iron", 14);
-        MATERIAL_MANAGER.register(3, "material.tool.diamond", 10);
-        MATERIAL_MANAGER.register(4, "material.tool.gold", 22);
-        MATERIAL_MANAGER.register(5, "material.armor.leather", 15);
-        MATERIAL_MANAGER.register(6, "material.armor.chainmail", 12);
-        MATERIAL_MANAGER.register(7, "material.armor.iron", 9);
-        MATERIAL_MANAGER.register(8, "material.armor.diamond", 10);
-        MATERIAL_MANAGER.register(9, "material.armor.gold", 25);
-        MATERIAL_MANAGER.register(10, "material.bow", 1);
-    }
-
-    @Override
-    public Item getItem(String item) {
-        return ITEM_MANAGER.getItem(item);
-    }
-
-    @Override
-    public Enchantment getEnchant(int id) {
-        return ENCHANTMENT_MANAGER.getEnchants()[id];
+        materialManager.register(0, "material.tool.wood", 15);
+        materialManager.register(1, "material.tool.stone", 5);
+        materialManager.register(2, "material.tool.iron", 14);
+        materialManager.register(3, "material.tool.diamond", 10);
+        materialManager.register(4, "material.tool.gold", 22);
+        materialManager.register(5, "material.armor.leather", 15);
+        materialManager.register(6, "material.armor.chainmail", 12);
+        materialManager.register(7, "material.armor.iron", 9);
+        materialManager.register(8, "material.armor.diamond", 10);
+        materialManager.register(9, "material.armor.gold", 25);
+        materialManager.register(10, "material.bow", 1);
     }
 
     @Override
@@ -76,29 +62,8 @@ public class Four implements Version {
     }
 
     @Override
-    public int getMaterialEnchantability(String s) {
-        Material material = MATERIAL_MANAGER.getMaterial(s);
-        if (material != null) {
-            return material.getEnchantability();
-        }
-        else {
-            return -1;
-        }
-    }
-
-    @Override
     public int getMaxBookShelves() {
         return 30;
-    }
-
-    @Override
-    public String[] getItemStrings() {
-        return ITEM_MANAGER.getItemStrings();
-    }
-
-    @Override
-    public String[] getMaterialStrings(String item) {
-        return MATERIAL_MANAGER.getValidMaterials(ITEM_MANAGER.getItem(item).getValidMaterials());
     }
 
     @Override
@@ -125,33 +90,33 @@ public class Four implements Version {
     public void reverseExtremes(RandomReverser reverser, int advances, boolean isLow) {
         for (int i = 0; i < (advances * 3)+2; i++) {
             reverser.consumeNextLongCalls(1);
-            reverser.consumeNextIntCalls(1, 31);
+            reverser.consumeNextIntCalls(1, 8);
             reverser.consumeNextIntCalls(1, 5);
-            reverser.consumeNextIntCalls(1, 31);
+            reverser.consumeNextIntCalls(1, 8);
             reverser.consumeNextIntCalls(1, 5);
-            reverser.consumeNextIntCalls(1, 31);
+            reverser.consumeNextIntCalls(1, 8);
             reverser.consumeNextIntCalls(1, 5);
         }
 
         reverser.consumeNextLongCalls(1);
-        reverser.consumeNextIntCalls(1, 31);
+        reverser.consumeNextIntCalls(1, 8);
         reverser.consumeNextIntCalls(1, 5);
-        reverser.consumeNextIntCalls(1, 31);
+        reverser.consumeNextIntCalls(1, 8);
         reverser.consumeNextIntCalls(1, 5);
 
         if (isLow) {
-            reverser.addNextIntCall(31, 0, 0);
+            reverser.addNextIntCall(8, 0, 0);
             reverser.addNextIntCall(5, 0, 0);
         }
         else {
-            reverser.addNextIntCall(31, 30, 30);
+            reverser.addNextIntCall(8, 7, 7);
             reverser.addNextIntCall(5, 4, 4);
         }
     }
 
     @Override
     public int getExtremesNeeded() {
-        return 13;
+        return 16;
     }
 
     @Override
@@ -170,8 +135,8 @@ public class Four implements Version {
         HashMap<Integer, EnchantData> enchantmentCandidates = null;
 
         for (int id = 0; id < 256; id++) {
-            Enchantment enchant = ENCHANTMENT_MANAGER.getEnchants()[id];
-            if (enchant != null && ITEM_MANAGER.getItem(item).validEnchantment(enchant.getId())) {
+            Enchantment enchant = enchantmentManager.getEnchants()[id];
+            if (enchant != null && itemManager.getItem(item).validEnchantment(enchant.getId())) {
                 for (int enchantLevel = 1; enchantLevel <= enchant.getMaxLevel(); enchantLevel++) {
                     if (enchantStep3 >= enchant.getMinEnchantability(enchantLevel) && enchantStep3 <= enchant.getMaxEnchantability(enchantLevel)) {
                         if (enchantmentCandidates == null) {
@@ -222,27 +187,5 @@ public class Four implements Version {
     @Override
     public CrackType getCrackType() {
         return CrackType.EXTREMES;
-    }
-
-    private static EnchantData getWeightedEnchantment(Random random, Collection<EnchantData> values) {
-        int totalWeight = 0;
-        for (EnchantData enchant : values) {
-            totalWeight += enchant.getEnchant().getWeight();
-        }
-        int selectedWeight = random.nextInt(totalWeight);
-
-        Iterator<EnchantData> weightIterator = values.iterator();
-        EnchantData selectedEnchant;
-        do {
-            if (!weightIterator.hasNext()) {
-                return null;
-            }
-
-            selectedEnchant = weightIterator.next();
-            selectedWeight -= selectedEnchant.getEnchant().getWeight();
-        }
-        while (selectedWeight >= 0);
-
-        return selectedEnchant;
     }
 }

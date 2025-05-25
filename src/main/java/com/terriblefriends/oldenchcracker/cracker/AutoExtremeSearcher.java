@@ -6,6 +6,7 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 import com.terriblefriends.oldenchcracker.EnchantCrackerI18n;
 import com.terriblefriends.oldenchcracker.version.Version;
+import com.terriblefriends.oldenchcracker.version.Versions;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,295 +18,307 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class AutoExtremeSearcher implements NativeKeyListener {
 
-    private static final boolean[] ONE = new boolean[]{
-            false, false, true, false, false,
-            false, true, true, false, false,
-            false, false, true, false, false,
-            false, false, true, false, false,
-            false, false, true, false, false,
-            false, false, true, false, false,
-            true, true, true, true, true
+    private static final long[] NUMBERS = new long[] {
+            0b01110100011001110101110011000101110L,
+            0b00100011000010000100001000010011111L,
+            0b01110100010000100110010001000111111L,
+            0b01110100010000100110000011000101110L,
+            0b00011001010100110001111110000100001L,
+            0b11111100001111000001000011000101110L,
+            0b00110010001000011110100011000101110L,
+            0b11111100010000100010001000010000100L,
+            0b01110100011000101110100011000101110L,
+            0b01110100011000101111000010001001100L
     };
 
-    private static final boolean[] FIVE = new boolean[]{
-            true, true, true, true, true,
-            true, false, false, false, false,
-            true, true, true, true, false,
-            false, false, false, false, true,
-            false, false, false, false, true,
-            true, false, false, false, true,
-            false, true, true, true, false
-    };
+    private static final int PAUSE_DELAY_MILLIS = 500;
 
-    private static final boolean[] SIX = new boolean[]{
-            false, false, true, true, false,
-            false, true, false, false, false,
-            true, false, false, false, false,
-            true, true, true, true, false,
-            true, false, false, false, true,
-            true, false, false, false, true,
-            false, true, true, true, false
-    };
+    private static final int[] COLOR_ACTIVE = new int[]{128, 255, 32};
+    private static final int[] COLOR_INACTIVE = new int[]{64, 127, 16};
 
-    private static final int[] colorActive = new int[]{128, 255, 32};
-    private static final int[] colorInactive = new int[]{64, 127, 16};
-
-    private Robot ROBOT;
+    private Robot robot;
     private int delay;
-    private int extremesNeeded;
+    private Version version;
     private JTextField[] advancesTextFields;
     private JCheckBox[] isLowCheckBoxes;
     private JButton crackButton;
     private JButton setupButton;
     private boolean windowsMode;
-    private int x;
-    private int y;
+    private int robotX;
+    private int robotY;
     private JLabel resultMessage;
     private int screenshotAttempts;
     private boolean testMode;
+    private Runnable runnableEnableFields;
 
     private boolean initialized;
-    private boolean setup;
-    private boolean hasStarted;
-    private boolean paused;
-    private boolean hasFoundAnything;
-    private Thread cycleThread;
+    private volatile boolean setup;
+    private volatile boolean run;
+    private volatile boolean running;
+    private volatile boolean paused;
 
     public void init() {
-        boolean errored = false;
         try {
-            ROBOT = new Robot();
+            robot = new Robot();
         }
         catch (AWTException | SecurityException ex) {
             ex.printStackTrace(System.err);
-            errored = true;
+            return;
         }
 
         try {
             GlobalScreen.registerNativeHook();
         }
         catch (NativeHookException ex) {
+            
             ex.printStackTrace(System.err);
-            errored = true;
+            return;
         }
-        this.initialized = !errored;
-    }
-
-    public void close() {
-        try {
-            GlobalScreen.unregisterNativeHook();
-        }
-        catch (NativeHookException ignored) {
-
-        }
+        this.initialized = true;
     }
 
     public boolean getInitialized() {
         return this.initialized;
     }
 
-    public void setup(Version version, int delay, int x, int y, boolean windowsMode, int screenshotAttempts, boolean testMode, JTextField[] advancesTextFields, JCheckBox[] isLowCheckBoxes, JButton crackButton, JButton setupButton, JLabel resultMessage) {
-        this.extremesNeeded = version.getExtremesNeeded();
+    public void setup(Version version, int delay, int x, int y, boolean windowsMode, int screenshotAttempts, boolean testMode, JTextField[] advancesTextFields, JCheckBox[] isLowCheckBoxes, JButton crackButton, JButton setupButton, JLabel resultMessage, Runnable runnableEnableFields) {
+        this.version = version;
         this.delay = delay;
         this.advancesTextFields = advancesTextFields;
         this.isLowCheckBoxes = isLowCheckBoxes;
         this.crackButton = crackButton;
         this.setupButton = setupButton;
         this.windowsMode = windowsMode;
-        this.x = x;
-        this.y = y;
+        this.robotX = x;
+        this.robotY = y;
         this.resultMessage = resultMessage;
         this.screenshotAttempts = screenshotAttempts;
         this.testMode = testMode;
-        this.hasStarted = false;
-        this.paused = false;
-        this.hasFoundAnything = false;
+        this.runnableEnableFields = runnableEnableFields;
+        this.setup = true;
 
         GlobalScreen.addNativeKeyListener(this);
-
-        this.setup = true;
     }
 
     @Override
     public void nativeKeyReleased(NativeKeyEvent keyEvent) {
         //System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(keyEvent.getKeyCode()));
 
-        if (!this.paused && keyEvent.getKeyCode() == NativeKeyEvent.VC_F4) {
-            if (!this.hasStarted) {
-                this.hasStarted = true;
-                this.cycleThread = new Thread(() -> {
-                    try {
-                        int cycles = 0;
-                        int collected = 0;
+        if (!this.running && keyEvent.getKeyCode() == NativeKeyEvent.VC_F4) {
+            this.run = true;
+            this.paused = false;
+            this.running = true;
 
-                        while (this.hasStarted) {
-                            if (this.paused) {
-                                Thread.sleep(1000);
-                                continue;
+            new Thread(() -> {
+                try {
+                    int cycles = 0;
+                    int collected = 0;
+                    boolean hasFoundAnything = false;
+
+                    while (this.run) {
+                        if (this.paused) {
+                            Thread.sleep(PAUSE_DELAY_MILLIS);
+                            continue;
+                        }
+
+                        BufferedImage bufferedImage;
+                        if (this.windowsMode) {
+                            bufferedImage = this.altPrintscreenScreenshot();
+                        }
+                        else {
+                            bufferedImage = this.robotScreenshot();
+                        }
+
+                        if (bufferedImage == null) {
+                            return;
+                        }
+
+                        if (this.windowsMode && (bufferedImage.getWidth() != 856 || bufferedImage.getHeight() != 512)) {
+                            this.exit(EnchantCrackerI18n.translate("panel.extremes.search.error.windowsize"));
+                            return;
+                        }
+
+                        int startX = this.windowsMode ? 559 : 0;
+                        int startY = this.windowsMode ? 227 : 0;
+
+                        long digitTwo = 0L;
+                        long digitOne = 0L;
+
+                        // scan in 5x7 areas for each pixel of each digit as bits in a long
+                        int index = 34;
+                        for (int y = 0; y < 7; y++) {
+                            for (int x = 0; x < 5; x++) {
+                                Color color = new Color(bufferedImage.getRGB(startX + (x * 2), startY + (y * 2)));
+                                boolean found = (color.getRed() == COLOR_ACTIVE[0] && color.getGreen() == COLOR_ACTIVE[1] && color.getBlue() == COLOR_ACTIVE[2]) || (color.getRed() == COLOR_INACTIVE[0] && color.getGreen() == COLOR_INACTIVE[1] && color.getBlue() == COLOR_INACTIVE[2]);
+                                digitTwo |= (found ? 1L : 0L) << index--;
                             }
+                        }
 
-                            BufferedImage bufferedImage;
-                            if (this.windowsMode) {
-                                bufferedImage = this.altPrintscreenScreenshot();
+                        index = 34;
+                        for (int y = 0; y < 7; y++) {
+                            for (int x = 0; x < 5; x++) {
+                                Color color = new Color(bufferedImage.getRGB(startX + 12 + (x * 2), startY + (y * 2)));
+                                boolean found = (color.getRed() == COLOR_ACTIVE[0] && color.getGreen() == COLOR_ACTIVE[1] && color.getBlue() == COLOR_ACTIVE[2]) || (color.getRed() == COLOR_INACTIVE[0] && color.getGreen() == COLOR_INACTIVE[1] && color.getBlue() == COLOR_INACTIVE[2]);
+                                digitOne |= (found ? 1L : 0L) << index--;
                             }
-                            else {
-                                bufferedImage = this.robotScreenshot();
-                            }
+                        }
 
-                            if (bufferedImage == null) {
-                                return;
-                            }
-
-                            if (this.windowsMode && (bufferedImage.getWidth() != 856 || bufferedImage.getHeight() != 512)) {
-                                this.exit(EnchantCrackerI18n.translate("panel.extremes.search.error.windowsize"));
-                                return;
-                            }
-
-                            boolean[] digitTwo = new boolean[35];
-
-                            int startX = this.windowsMode ? 559 : 0;
-                            int startY = this.windowsMode ? 227 : 0;
-
-                            boolean foundAnything = false;
-
-                            int index = 0;
-                            for (int y = 0; y < 7; y++) {
-                                for (int x = 0; x < 5; x++) {
-                                    Color color = new Color(bufferedImage.getRGB(startX + (x * 2), startY + (y * 2)));
-                                    boolean found = (color.getRed() == colorActive[0] && color.getGreen() == colorActive[1] && color.getBlue() == colorActive[2]) || (color.getRed() == colorInactive[0] && color.getGreen() == colorInactive[1] && color.getBlue() == colorInactive[2]);
-                                    if (found) {
-                                        foundAnything = true;
-                                    }
-                                    digitTwo[index] = found;
-                                    index++;
-                                }
-                            }
-
-                            boolean[] digitOne = new boolean[35];
-
-                            index = 0;
-                            for (int y = 0; y < 7; y++) {
-                                for (int x = 0; x < 5; x++) {
-                                    Color color = new Color(bufferedImage.getRGB(startX + 12 + (x * 2), startY + (y * 2)));
-                                    boolean found = (color.getRed() == colorActive[0] && color.getGreen() == colorActive[1] && color.getBlue() == colorActive[2]) || (color.getRed() == colorInactive[0] && color.getGreen() == colorInactive[1] && color.getBlue() == colorInactive[2]);
-                                    if (found) {
-                                        foundAnything = true;
-                                    }
-                                    digitOne[index] = found;
-                                    index++;
-                                }
-                            }
-
-                            boolean singleDigit = true;
-
-                            if (!this.hasFoundAnything && !foundAnything) {
+                        //if we encounter a blank page (e.g. lag), just wait until the thing loads
+                        if (digitOne == 0 && digitTwo == 0) {
+                            if (!hasFoundAnything) {
                                 this.exit(EnchantCrackerI18n.translate("panel.extremes.search.error.nopixels"));
                                 return;
                             }
                             else {
-                                this.hasFoundAnything = true;
-                            }
-
-                            //if we encounter a blank page (e.g. lag), just wait until the thing loads
-                            if (foundAnything) {
-                                for (boolean b : digitTwo) {
-                                    if (b) {
-                                        singleDigit = false;
-                                        break;
-                                    }
-                                }
-
-                                if (this.testMode && Arrays.equals(digitOne, FIVE)) {
-                                    this.exit(EnchantCrackerI18n.translate("panel.extremes.search.testsuccess"));
-                                    return;
-                                }
-
-                                if (Arrays.equals(digitTwo, FIVE)) {
-                                    this.isLowCheckBoxes[collected].setSelected(false);
-                                    if (collected != 0) {
-                                        this.advancesTextFields[collected].setText(String.valueOf(cycles));
-                                    }
-                                    collected++;
-                                    cycles = 0;
-                                    if (collected == this.extremesNeeded) {
-                                        this.exit(EnchantCrackerI18n.translate("panel.extremes.search.success"));
-                                        this.crackButton.setEnabled(true);
-                                        return;
-                                    }
-                                } else if (singleDigit && this.extremesNeeded == 5 && Arrays.equals(digitOne, ONE)) {
-                                    this.isLowCheckBoxes[collected].setSelected(true);
-                                    if (collected != 0) {
-                                        this.advancesTextFields[collected].setText(String.valueOf(cycles));
-                                    }
-                                    collected++;
-                                    cycles = 0;
-                                    if (collected == this.extremesNeeded) {
-                                        this.exit(EnchantCrackerI18n.translate("panel.extremes.search.success"));
-                                        this.crackButton.setEnabled(true);
-                                        return;
-                                    }
-                                } else if (this.extremesNeeded == 11 && Arrays.equals(digitTwo, ONE) && Arrays.equals(digitOne, SIX)) {
-                                    this.isLowCheckBoxes[collected].setSelected(true);
-                                    if (collected != 0) {
-                                        this.advancesTextFields[collected].setText(String.valueOf(cycles));
-                                    }
-                                    collected++;
-                                    cycles = 0;
-                                    if (collected == this.extremesNeeded) {
-                                        this.exit(EnchantCrackerI18n.translate("panel.extremes.search.success"));
-                                        this.crackButton.setEnabled(true);
-                                        return;
-                                    }
-                                } else {
-                                    cycles++;
-                                }
-
-                                ROBOT.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-                                Thread.sleep(10);
-                                ROBOT.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-                                ROBOT.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-                            }
-                            else {
                                 System.out.println(EnchantCrackerI18n.translate("panel.extremes.search.error.emptypage"));
-                            }
-
-                            try {
                                 Thread.sleep(this.delay);
+                                continue;
                             }
-                            catch (InterruptedException ignored) {}
-
                         }
-                    } catch (Exception e) {
-                        this.exit(EnchantCrackerI18n.translate("panel.extremes.search.error.unknown"));
-                        e.printStackTrace(System.err);
+                        else {
+                            hasFoundAnything = true;
+                        }
+
+                        int result = 0;
+
+                        for (int i = 0; i < NUMBERS.length; i++) {
+                            if (NUMBERS[i] == digitOne) {
+                                result += i;
+                            }
+                            if (NUMBERS[i] == digitTwo) {
+                                result += i * 10;
+                            }
+                        }
+
+                        //System.out.println(Long.toString(digitOne, 2));
+                        //System.out.println(Long.toString(digitTwo, 2));
+                        //System.out.println(result);
+
+                        if (this.testMode) {
+                            this.exit(String.format(EnchantCrackerI18n.translate("panel.extremes.search.testsuccess"), result));
+                            return;
+                        }
+
+                        // for versions 0-1 high is 15 low is 1
+                        // for versions 2-4 high is 15 low is 4
+                        if (result > 15) {
+                            this.exit(EnchantCrackerI18n.translate("panel.extremes.search.error.bookshelves"));
+                            return;
+                        }
+
+                        int lowLevel = 4;
+                        if (this.version == Versions.ZERO || this.version == Versions.TWO) {
+                            lowLevel = 1;
+                        }
+
+                        if (result == 15 || result == lowLevel) {
+                            this.isLowCheckBoxes[collected].setSelected(result == lowLevel);
+                            if (collected != 0) {
+                                this.advancesTextFields[collected].setText(String.valueOf(cycles));
+                            }
+                            collected++;
+                            cycles = 0;
+                        } else {
+                            cycles++;
+                        }
+
+                        if (collected == this.version.getExtremesNeeded()) {
+                            this.exit(EnchantCrackerI18n.translate("panel.extremes.search.success"));
+                            this.crackButton.setEnabled(true);
+                            return;
+                        }
+
+                        // double left click to cycle levels
+                        robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                        Thread.sleep(10);
+                        robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+
+                        Thread.sleep(this.delay);
                     }
-                });
-                this.cycleThread.start();
-            }
+                }
+                catch (InterruptedException ignored) {}
+                catch (Exception e) {
+                    this.exit(EnchantCrackerI18n.translate("panel.extremes.search.error.unknown"));
+                    e.printStackTrace(System.err);
+                }
+                finally {
+                    this.exitInternal();
+                }
+            }).start();
         }
-        else if (!this.paused && keyEvent.getKeyCode() == NativeKeyEvent.VC_F12) {
+        else if (keyEvent.getKeyCode() == NativeKeyEvent.VC_F12) {
             this.exit(EnchantCrackerI18n.translate("panel.extremes.search.terminated"));
         }
-        else if (keyEvent.getKeyCode() == NativeKeyEvent.VC_F8) {
+        else if (this.running && keyEvent.getKeyCode() == NativeKeyEvent.VC_F8) {
             this.paused = !this.paused;
             this.resultMessage.setText(EnchantCrackerI18n.translate("panel.extremes.search.paused."+this.paused));
         }
     }
 
+    public void exit(String message) {
+        // avoid NPEs
+        if (!this.setup) {
+            return;
+        }
+
+        this.setup = false;
+
+        // tell search thread to stop
+        this.run = false;
+        this.resultMessage.setText(message);
+
+        // if thread was started, it will clean these up when it stops, otherwise do it here
+        if (!this.running) {
+            this.exitInternal();
+        }
+    }
+
+    private void exitInternal() {
+        GlobalScreen.removeNativeKeyListener(this);
+
+        // release all keys
+        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+        robot.keyRelease(KeyEvent.VK_ALT);
+        robot.keyRelease(KeyEvent.VK_PRINTSCREEN);
+
+        this.setupButton.setEnabled(true);
+
+        this.runnableEnableFields.run();
+
+        this.setup = false;
+        this.running = false;
+    }
+
+    public void close() {
+        this.exit(EnchantCrackerI18n.translate("panel.extremes.search.terminated"));
+        // wait until search thread terminates
+        while (this.running) {
+            try {
+                Thread.sleep(10);
+            }
+            catch (InterruptedException ignored) {}
+        }
+        try {
+            GlobalScreen.unregisterNativeHook();
+        }
+        catch (NativeHookException ignored) {}
+    }
+
     private BufferedImage robotScreenshot() {
-        Rectangle capture = new Rectangle(this.x, this.y, this.x+20, this.y+12);
-        return ROBOT.createScreenCapture(capture);
+        Rectangle capture = new Rectangle(this.robotX, this.robotY, this.robotX+20, this.robotY +12);
+        return robot.createScreenCapture(capture);
     }
 
     private BufferedImage altPrintscreenScreenshot() {
-        ROBOT.keyPress(KeyEvent.VK_ALT);
-        ROBOT.keyPress(KeyEvent.VK_PRINTSCREEN);
-        ROBOT.keyRelease(KeyEvent.VK_ALT);
-        ROBOT.keyRelease(KeyEvent.VK_PRINTSCREEN);
+        robot.keyPress(KeyEvent.VK_ALT);
+        robot.keyPress(KeyEvent.VK_PRINTSCREEN);
+        robot.keyRelease(KeyEvent.VK_ALT);
+        robot.keyRelease(KeyEvent.VK_PRINTSCREEN);
 
         Image image = saveImageFromClipboard();
         if (image == null) {
@@ -318,24 +331,6 @@ public class AutoExtremeSearcher implements NativeKeyListener {
             return null;
         }
         return bufferedImage;
-    }
-
-    public void exit(String message) {
-        if (this.setup) {
-            if (this.hasStarted) {
-                this.cycleThread.interrupt();
-                ROBOT.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-                ROBOT.keyRelease(KeyEvent.VK_ALT);
-                ROBOT.keyRelease(KeyEvent.VK_PRINTSCREEN);
-                this.hasStarted = false;
-                this.paused = false;
-                this.hasFoundAnything = false;
-            }
-            this.resultMessage.setText(message);
-            this.setupButton.setEnabled(true);
-            GlobalScreen.removeNativeKeyListener(this);
-        }
-        this.setup = false;
     }
 
     private Image saveImageFromClipboard() {
@@ -363,17 +358,13 @@ public class AutoExtremeSearcher implements NativeKeyListener {
         return null;
     }
 
-
-
     private static BufferedImage convertToBufferedImage(Image img) {
         BufferedImage bImage;
         if(img != null) {
-            if (img instanceof BufferedImage)
-            {
+            if (img instanceof BufferedImage) {
                 bImage = (BufferedImage) img;
             }
-            else
-            {
+            else {
                 // Create a buffered image with transparency
                 bImage  = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
             }
