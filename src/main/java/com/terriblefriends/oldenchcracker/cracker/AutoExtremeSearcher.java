@@ -210,7 +210,7 @@ public class AutoExtremeSearcher implements NativeKeyListener {
                         }
 
                         int lowLevel = 4;
-                        if (this.version == Versions.ZERO || this.version == Versions.TWO) {
+                        if (this.version == Versions.ZERO || this.version == Versions.ONE) {
                             lowLevel = 1;
                         }
 
